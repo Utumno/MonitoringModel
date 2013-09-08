@@ -57,6 +57,10 @@ public final class Battery {
 		}
 	}
 
+	// public List<Battery> parse(File f) {
+	// final FileInputStream fis = new FileInputStream(f);
+	// List<String> entries = FileStore.getEntries(fis, BatteryFields.class);
+	// }
 	public long getTime() {
 		return time;
 	}
