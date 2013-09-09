@@ -30,18 +30,17 @@ public final class Wifi {
 			}
 
 			@Override
-			public <T, D> D parse(List<T> list, D objectToModify) {
+			public <T, D> D parse(List<T> list, D objectToModify)
+					throws ParserException {
 				Wifi wi = (Wifi) objectToModify;
 				try {
 					// yeah when the Field has lists all List<T> are
 					// List<List<Byte>>
 					wi.time = listToLong(((List<List<Byte>>) list).get(0));
 				} catch (NumberFormatException e) {
-					// TODO parser exception
-					throw new IllegalStateException("Malformed file", e);
+					throw new ParserException("Malformed file", e);
 				} catch (UnsupportedEncodingException e) {
-					// TODO parser exception
-					throw new IllegalStateException("Malformed file", e);
+					throw new ParserException("Malformed file", e);
 				}
 				return (D) wi;
 			}
@@ -61,7 +60,8 @@ public final class Wifi {
 			}
 
 			@Override
-			public <T, D> D parse(List<T> list, D objectToModify) {
+			public <T, D> D parse(List<T> list, D objectToModify)
+					throws ParserException {
 				final Wifi wi = (Wifi) objectToModify;
 				final List<List<Byte>> doubleList = (List<List<Byte>>) list;
 				final List<Network> nets = wi.networks;
@@ -75,11 +75,9 @@ public final class Wifi {
 						nets.add(n);
 					}
 				} catch (NumberFormatException e) {
-					// TODO parser exception
-					throw new IllegalStateException("Malformed file", e);
+					throw new ParserException("Malformed file", e);
 				} catch (UnsupportedEncodingException e) {
-					// TODO parser exception
-					throw new IllegalStateException("Malformed file", e);
+					throw new ParserException("Malformed file", e);
 				}
 				return (D) wi;
 			}
@@ -99,7 +97,8 @@ public final class Wifi {
 			}
 
 			@Override
-			public <T, D> D parse(List<T> list, D objectToModify) {
+			public <T, D> D parse(List<T> list, D objectToModify)
+					throws ParserException {
 				final Wifi wi = (Wifi) objectToModify;
 				final List<List<Byte>> doubleList = (List<List<Byte>>) list;
 				final List<Network> nets = wi.networks;
@@ -109,21 +108,20 @@ public final class Wifi {
 						for (List<Byte> lb : doubleList) {
 							String bssid = listToString(lb,
 								FileStore.FILES_ENCODING);
-							// TODO parser exception message if index out of
-							// bounds
 							Network n = nets.get(i++);
 							n.bssid = bssid;
 						}
+						if (i < nets.size())
+							throw new ParserException(
+									"Malformed file : extra SSIDs with no BSSID");
 					}
 				} catch (NumberFormatException e) {
-					// TODO parser exception
-					throw new IllegalStateException("Malformed file", e);
+					throw new ParserException("Malformed file", e);
 				} catch (UnsupportedEncodingException e) {
-					// TODO parser exception
-					throw new IllegalStateException("Malformed file", e);
+					throw new ParserException("Malformed file : missing ", e);
 				} catch (IndexOutOfBoundsException e) {
-					// TODO parser exception
-					throw new IllegalStateException("Malformed file", e);
+					throw new ParserException(
+							"Malformed file : extra BSSIDs with no SSID", e);
 				}
 				return (D) wi;
 			}
@@ -144,7 +142,8 @@ public final class Wifi {
 			}
 
 			@Override
-			public <T, D> D parse(List<T> list, D objectToModify) {
+			public <T, D> D parse(List<T> list, D objectToModify)
+					throws ParserException {
 				final Wifi wi = (Wifi) objectToModify;
 				final List<List<Byte>> doubleList = (List<List<Byte>>) list;
 				final List<Network> nets = wi.networks;
@@ -153,21 +152,22 @@ public final class Wifi {
 						int i = 0;
 						for (List<Byte> lb : doubleList) {
 							int freq = (int) listToLong(lb);
-							// TODO parser exception message if index out of
-							// bounds
 							Network n = nets.get(i++);
 							n.frequency = freq;
 						}
+						if (i < nets.size())
+							throw new ParserException(
+									"Malformed file : extra SSIDs with no "
+										+ "frequencies");
 					}
 				} catch (NumberFormatException e) {
-					// TODO parser exception
-					throw new IllegalStateException("Malformed file", e);
+					throw new ParserException("Malformed file", e);
 				} catch (UnsupportedEncodingException e) {
-					// TODO parser exception
-					throw new IllegalStateException("Malformed file", e);
+					throw new ParserException("Malformed file", e);
 				} catch (IndexOutOfBoundsException e) {
-					// TODO parser exception
-					throw new IllegalStateException("Malformed file", e);
+					throw new ParserException(
+							"Malformed file : extra frequencies with no "
+								+ "frequencies", e);
 				}
 				return (D) wi;
 			}
@@ -188,7 +188,8 @@ public final class Wifi {
 			}
 
 			@Override
-			public <T, D> D parse(List<T> list, D objectToModify) {
+			public <T, D> D parse(List<T> list, D objectToModify)
+					throws ParserException {
 				final Wifi wi = (Wifi) objectToModify;
 				final List<List<Byte>> doubleList = (List<List<Byte>>) list;
 				final List<Network> nets = wi.networks;
@@ -197,21 +198,21 @@ public final class Wifi {
 						int i = 0;
 						for (List<Byte> lb : doubleList) {
 							int level = (int) listToLong(lb);
-							// TODO parser exception message if index out of
-							// bounds
 							Network n = nets.get(i++);
 							n.level = level;
 						}
+						if (i < nets.size())
+							throw new ParserException(
+									"Malformed file : extra SSIDs with no "
+										+ "level");
 					}
 				} catch (NumberFormatException e) {
-					// TODO parser exception
-					throw new IllegalStateException("Malformed file", e);
+					throw new ParserException("Malformed file", e);
 				} catch (UnsupportedEncodingException e) {
-					// TODO parser exception
-					throw new IllegalStateException("Malformed file", e);
+					throw new ParserException("Malformed file", e);
 				} catch (IndexOutOfBoundsException e) {
-					// TODO parser exception
-					throw new IllegalStateException("Malformed file", e);
+					throw new ParserException(
+							"Malformed file : extra level with no SSIDs", e);
 				}
 				return (D) wi;
 			}

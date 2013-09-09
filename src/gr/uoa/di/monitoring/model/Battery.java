@@ -40,16 +40,15 @@ public final class Battery {
 			}
 
 			@Override
-			public <T, D> D parse(List<T> list, D objectToModify) {
+			public <T, D> D parse(List<T> list, D objectToModify)
+					throws ParserException {
 				Battery bat = (Battery) objectToModify;
 				try {
 					bat.time = listToLong((List<Byte>) list);
 				} catch (NumberFormatException e) {
-					// TODO parser exception
-					throw new IllegalStateException("Malformed file", e);
+					throw new ParserException("Malformed file", e);
 				} catch (UnsupportedEncodingException e) {
-					// TODO parser exception
-					throw new IllegalStateException("Malformed file", e);
+					throw new ParserException("Malformed file", e);
 				}
 				return (D) bat;
 			}
@@ -73,8 +72,7 @@ public final class Battery {
 						FileStore.FILES_ENCODING);
 					return (D) bat;
 				} catch (UnsupportedEncodingException e) {
-					// TODO parser exception
-					throw new IllegalStateException("Malformed file", e);
+					throw new ParserException("Malformed file", e);
 				}
 			}
 		};
@@ -93,7 +91,8 @@ public final class Battery {
 		}
 	}
 
-	public List<Battery> parse(File f) throws IOException {
+	// TODO move this into base class Data and make it abstract
+	public List<Battery> parse(File f) throws IOException, ParserException {
 		final FileInputStream fis = new FileInputStream(f);
 		List<EnumMap<BatteryFields, Object>> entries = FileStore.getEntries(
 			fis, BatteryFields.class);

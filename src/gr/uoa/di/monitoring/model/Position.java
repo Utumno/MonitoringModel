@@ -32,16 +32,15 @@ public final class Position /* TODO extends Data */{
 			}
 
 			@Override
-			public <T, D> D parse(List<T> list, D objectToModify) {
+			public <T, D> D parse(List<T> list, D objectToModify)
+					throws ParserException {
 				Position pos = (Position) objectToModify;
 				try {
 					pos.time = listToLong((List<Byte>) list);
 				} catch (NumberFormatException e) {
-					// TODO parser exception
-					throw new IllegalStateException("Malformed file", e);
+					throw new ParserException("Malformed file", e);
 				} catch (UnsupportedEncodingException e) {
-					// TODO parser exception
-					throw new IllegalStateException("Malformed file", e);
+					throw new ParserException("Malformed file", e);
 				}
 				return (D) pos;
 			}
@@ -58,16 +57,15 @@ public final class Position /* TODO extends Data */{
 			}
 
 			@Override
-			public <T, D> D parse(List<T> list, D objectToModify) {
+			public <T, D> D parse(List<T> list, D objectToModify)
+					throws ParserException {
 				Position pos = (Position) objectToModify;
 				try {
 					pos.latitude = listToDouble((List<Byte>) list);
 				} catch (NumberFormatException e) {
-					// TODO parser exception
-					throw new IllegalStateException("Malformed file", e);
+					throw new ParserException("Malformed file", e);
 				} catch (UnsupportedEncodingException e) {
-					// TODO parser exception
-					throw new IllegalStateException("Malformed file", e);
+					throw new ParserException("Malformed file", e);
 				}
 				return (D) pos;
 			}
@@ -84,16 +82,15 @@ public final class Position /* TODO extends Data */{
 			}
 
 			@Override
-			public <T, D> D parse(List<T> list, D objectToModify) {
+			public <T, D> D parse(List<T> list, D objectToModify)
+					throws ParserException {
 				Position pos = (Position) objectToModify;
 				try {
 					pos.longitude = listToDouble((List<Byte>) list);
 				} catch (NumberFormatException e) {
-					// TODO parser exception
-					throw new IllegalStateException("Malformed file", e);
+					throw new ParserException("Malformed file", e);
 				} catch (UnsupportedEncodingException e) {
-					// TODO parser exception
-					throw new IllegalStateException("Malformed file", e);
+					throw new ParserException("Malformed file", e);
 				}
 				return (D) pos;
 			}
@@ -110,17 +107,16 @@ public final class Position /* TODO extends Data */{
 			}
 
 			@Override
-			public <T, D> D parse(List<T> list, D objectToModify) {
+			public <T, D> D parse(List<T> list, D objectToModify)
+					throws ParserException {
 				Position pos = (Position) objectToModify;
 				try {
 					pos.provider = listToString((List<Byte>) list,
 						FileStore.FILES_ENCODING);
 				} catch (NumberFormatException e) {
-					// TODO parser exception
-					throw new IllegalStateException("Malformed file", e);
+					throw new ParserException("Malformed file", e);
 				} catch (UnsupportedEncodingException e) {
-					// TODO parser exception
-					throw new IllegalStateException("Malformed file", e);
+					throw new ParserException("Malformed file", e);
 				}
 				return (D) pos;
 			}

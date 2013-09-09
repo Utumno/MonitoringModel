@@ -2,6 +2,7 @@ package gr.uoa.di.monitoring.android.persist;
 
 import gr.uoa.di.android.helpers.FileIO;
 import gr.uoa.di.java.helpers.Utils;
+import gr.uoa.di.monitoring.model.ParserException;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -200,7 +201,8 @@ public final class FileStore {
 
 		<T> List<byte[]> getData(T data);
 
-		public <T, D> D parse(List<T> list, D objectToModify);
+		<K, D> D parse(List<K> list, D objectToModify)
+				throws ParserException;
 	}
 
 	// public static <T> T[] concat(T[] first, T[] second) {
