@@ -1,7 +1,11 @@
 package gr.uoa.di.monitoring.model;
 
+import static gr.uoa.di.java.helpers.Utils.listToDouble;
+import static gr.uoa.di.java.helpers.Utils.listToLong;
+import static gr.uoa.di.java.helpers.Utils.listToString;
 import gr.uoa.di.monitoring.android.persist.FileStore;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,7 +13,7 @@ import org.apache.http.util.EncodingUtils;
 
 import android.location.Location;
 
-public final class Position {
+public final class Position /* TODO extends Data */{
 
 	private long time;
 	private double latitude;
@@ -26,6 +30,21 @@ public final class Position {
 				arrayList.add(EncodingUtils.getAsciiBytes(loc.getTime() + ""));
 				return arrayList;
 			}
+
+			@Override
+			public <T, D> D parse(List<T> list, D objectToModify) {
+				Position pos = (Position) objectToModify;
+				try {
+					pos.time = listToLong((List<Byte>) list);
+				} catch (NumberFormatException e) {
+					// TODO parser exception
+					throw new IllegalStateException("Malformed file", e);
+				} catch (UnsupportedEncodingException e) {
+					// TODO parser exception
+					throw new IllegalStateException("Malformed file", e);
+				}
+				return (D) pos;
+			}
 		},
 		LAT {
 
@@ -36,6 +55,21 @@ public final class Position {
 				arrayList.add(EncodingUtils.getAsciiBytes(loc.getLatitude()
 					+ ""));
 				return arrayList;
+			}
+
+			@Override
+			public <T, D> D parse(List<T> list, D objectToModify) {
+				Position pos = (Position) objectToModify;
+				try {
+					pos.latitude = listToDouble((List<Byte>) list);
+				} catch (NumberFormatException e) {
+					// TODO parser exception
+					throw new IllegalStateException("Malformed file", e);
+				} catch (UnsupportedEncodingException e) {
+					// TODO parser exception
+					throw new IllegalStateException("Malformed file", e);
+				}
+				return (D) pos;
 			}
 		},
 		LONG {
@@ -48,6 +82,21 @@ public final class Position {
 					+ ""));
 				return arrayList;
 			}
+
+			@Override
+			public <T, D> D parse(List<T> list, D objectToModify) {
+				Position pos = (Position) objectToModify;
+				try {
+					pos.longitude = listToDouble((List<Byte>) list);
+				} catch (NumberFormatException e) {
+					// TODO parser exception
+					throw new IllegalStateException("Malformed file", e);
+				} catch (UnsupportedEncodingException e) {
+					// TODO parser exception
+					throw new IllegalStateException("Malformed file", e);
+				}
+				return (D) pos;
+			}
 		},
 		PROVIDER {
 
@@ -58,6 +107,22 @@ public final class Position {
 				arrayList.add(EncodingUtils.getAsciiBytes(loc.getProvider()
 					+ ""));
 				return arrayList;
+			}
+
+			@Override
+			public <T, D> D parse(List<T> list, D objectToModify) {
+				Position pos = (Position) objectToModify;
+				try {
+					pos.provider = listToString((List<Byte>) list,
+						FileStore.FILES_ENCODING);
+				} catch (NumberFormatException e) {
+					// TODO parser exception
+					throw new IllegalStateException("Malformed file", e);
+				} catch (UnsupportedEncodingException e) {
+					// TODO parser exception
+					throw new IllegalStateException("Malformed file", e);
+				}
+				return (D) pos;
 			}
 		};
 
@@ -73,5 +138,21 @@ public final class Position {
 			}
 			return listByteArrays;
 		}
+	}
+
+	public long getTime() {
+		return time;
+	}
+
+	public double getLatitude() {
+		return latitude;
+	}
+
+	public double getLongitude() {
+		return longitude;
+	}
+
+	public String getProvider() {
+		return new String(provider);
 	}
 }

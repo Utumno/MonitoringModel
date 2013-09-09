@@ -1,8 +1,16 @@
 package gr.uoa.di.monitoring.model;
 
+import static gr.uoa.di.java.helpers.Utils.listToLong;
+import static gr.uoa.di.java.helpers.Utils.listToString;
+import gr.uoa.di.monitoring.android.persist.FileStore;
 import gr.uoa.di.monitoring.android.persist.FileStore.Fields;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
 
 import org.apache.http.util.EncodingUtils;
@@ -30,6 +38,21 @@ public final class Battery {
 						.currentTimeMillis() + ""));
 				return arrayList;
 			}
+
+			@Override
+			public <T, D> D parse(List<T> list, D objectToModify) {
+				Battery bat = (Battery) objectToModify;
+				try {
+					bat.time = listToLong((List<Byte>) list);
+				} catch (NumberFormatException e) {
+					// TODO parser exception
+					throw new IllegalStateException("Malformed file", e);
+				} catch (UnsupportedEncodingException e) {
+					// TODO parser exception
+					throw new IllegalStateException("Malformed file", e);
+				}
+				return (D) bat;
+			}
 		},
 		STATUS {
 
@@ -40,6 +63,19 @@ public final class Battery {
 				arrayList.add(EncodingUtils.getAsciiBytes(batteryStatus
 						.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) + ""));
 				return arrayList;
+			}
+
+			@Override
+			public <T, D> D parse(List<T> list, D objectToModify) {
+				try {
+					Battery bat = (Battery) objectToModify;
+					bat.status = listToString((List<Byte>) list,
+						FileStore.FILES_ENCODING);
+					return (D) bat;
+				} catch (UnsupportedEncodingException e) {
+					// TODO parser exception
+					throw new IllegalStateException("Malformed file", e);
+				}
 			}
 		};
 
@@ -57,10 +93,20 @@ public final class Battery {
 		}
 	}
 
-	// public List<Battery> parse(File f) {
-	// final FileInputStream fis = new FileInputStream(f);
-	// List<String> entries = FileStore.getEntries(fis, BatteryFields.class);
-	// }
+	public List<Battery> parse(File f) throws IOException {
+		final FileInputStream fis = new FileInputStream(f);
+		List<EnumMap<BatteryFields, Object>> entries = FileStore.getEntries(
+			fis, BatteryFields.class);
+		List<Battery> data = new ArrayList<Battery>();
+		for (EnumMap<BatteryFields, Object> enumMap : entries) {
+			Battery bat = new Battery();
+			for (BatteryFields field : enumMap.keySet()) {
+				field.parse((List<Byte>) enumMap.get(field), bat);
+			}
+		}
+		return data;
+	}
+
 	public long getTime() {
 		return time;
 	}

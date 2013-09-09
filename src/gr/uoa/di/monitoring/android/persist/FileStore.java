@@ -1,6 +1,7 @@
 package gr.uoa.di.monitoring.android.persist;
 
 import gr.uoa.di.android.helpers.FileIO;
+import gr.uoa.di.java.helpers.Utils;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -19,6 +20,12 @@ public final class FileStore {
 	private static final byte ARRAY_DELIMITER = 1;
 	private static final byte NEWLINE = '\n';
 	private static final int INPUT_STEAM_BUFFER_SIZE = 8192; // vanilla default
+	/**
+	 * The parsers need to create strings from the files they parse - this field
+	 * specifies the expected encoding of the files. Should be used by monitors
+	 * whenever they write text files also TODO
+	 */
+	public static final String FILES_ENCODING = Utils.UTF8;
 
 	private FileStore() {}
 
@@ -192,6 +199,8 @@ public final class FileStore {
 		boolean isList();
 
 		<T> List<byte[]> getData(T data);
+
+		public <T, D> D parse(List<T> list, D objectToModify);
 	}
 
 	// public static <T> T[] concat(T[] first, T[] second) {
