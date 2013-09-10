@@ -27,11 +27,11 @@ public final class Battery {
 		return "Hello server";
 	}
 
-	public static enum BatteryFields implements Fields {
+	public static enum BatteryFields implements Fields<Intent, Battery> {
 		TIME {
 
 			@Override
-			public <T> List<byte[]> getData(T data) {
+			public List<byte[]> getData(Intent data) {
 				// TODO time()
 				List<byte[]> arrayList = new ArrayList<byte[]>();
 				arrayList.add(EncodingUtils.getAsciiBytes(System
@@ -40,9 +40,8 @@ public final class Battery {
 			}
 
 			@Override
-			public <T, D> D parse(List<T> list, D objectToModify)
+			public <T> Battery parse(List<T> list, Battery bat)
 					throws ParserException {
-				Battery bat = (Battery) objectToModify;
 				try {
 					bat.time = listToLong((List<Byte>) list);
 				} catch (NumberFormatException e) {
@@ -50,14 +49,13 @@ public final class Battery {
 				} catch (UnsupportedEncodingException e) {
 					throw new ParserException("Malformed file", e);
 				}
-				return (D) bat;
+				return bat;
 			}
 		},
 		STATUS {
 
 			@Override
-			public <T> List<byte[]> getData(T data) {
-				final Intent batteryStatus = (Intent) data;
+			public List<byte[]> getData(Intent batteryStatus) {
 				List<byte[]> arrayList = new ArrayList<byte[]>();
 				arrayList.add(EncodingUtils.getAsciiBytes(batteryStatus
 						.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) + ""));
@@ -65,12 +63,12 @@ public final class Battery {
 			}
 
 			@Override
-			public <T, D> D parse(List<T> list, D objectToModify) {
+			public <T> Battery parse(List<T> list, Battery bat)
+					throws ParserException {
 				try {
-					Battery bat = (Battery) objectToModify;
 					bat.status = listToString((List<Byte>) list,
 						FileStore.FILES_ENCODING);
-					return (D) bat;
+					return bat;
 				} catch (UnsupportedEncodingException e) {
 					throw new ParserException("Malformed file", e);
 				}
@@ -82,7 +80,7 @@ public final class Battery {
 			return false; // no lists here
 		}
 
-		public static <T> List<byte[]> createListOfByteArrays(T data) {
+		public static List<byte[]> createListOfByteArrays(Intent data) {
 			final List<byte[]> listByteArrays = new ArrayList<byte[]>();
 			for (BatteryFields bs : BatteryFields.values()) {
 				if (!bs.isList()) listByteArrays.add(bs.getData(data).get(0));

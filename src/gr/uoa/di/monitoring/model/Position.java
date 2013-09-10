@@ -20,21 +20,20 @@ public final class Position /* TODO extends Data */{
 	private double longitude;
 	private String provider;
 
-	public static enum LocationFields implements FileStore.Fields {
+	public static enum LocationFields implements
+			FileStore.Fields<Location, Position> {
 		TIME {
 
 			@Override
-			public <T> List<byte[]> getData(T data) {
-				Location loc = (Location) data;
+			public List<byte[]> getData(Location loc) {
 				List<byte[]> arrayList = new ArrayList<byte[]>();
 				arrayList.add(EncodingUtils.getAsciiBytes(loc.getTime() + ""));
 				return arrayList;
 			}
 
 			@Override
-			public <T, D> D parse(List<T> list, D objectToModify)
+			public <T> Position parse(List<T> list, Position pos)
 					throws ParserException {
-				Position pos = (Position) objectToModify;
 				try {
 					pos.time = listToLong((List<Byte>) list);
 				} catch (NumberFormatException e) {
@@ -42,14 +41,13 @@ public final class Position /* TODO extends Data */{
 				} catch (UnsupportedEncodingException e) {
 					throw new ParserException("Malformed file", e);
 				}
-				return (D) pos;
+				return pos;
 			}
 		},
 		LAT {
 
 			@Override
-			public <T> List<byte[]> getData(T data) {
-				Location loc = (Location) data;
+			public List<byte[]> getData(Location loc) {
 				List<byte[]> arrayList = new ArrayList<byte[]>();
 				arrayList.add(EncodingUtils.getAsciiBytes(loc.getLatitude()
 					+ ""));
@@ -57,9 +55,8 @@ public final class Position /* TODO extends Data */{
 			}
 
 			@Override
-			public <T, D> D parse(List<T> list, D objectToModify)
+			public <T> Position parse(List<T> list, Position pos)
 					throws ParserException {
-				Position pos = (Position) objectToModify;
 				try {
 					pos.latitude = listToDouble((List<Byte>) list);
 				} catch (NumberFormatException e) {
@@ -67,14 +64,13 @@ public final class Position /* TODO extends Data */{
 				} catch (UnsupportedEncodingException e) {
 					throw new ParserException("Malformed file", e);
 				}
-				return (D) pos;
+				return pos;
 			}
 		},
 		LONG {
 
 			@Override
-			public <T> List<byte[]> getData(T data) {
-				Location loc = (Location) data;
+			public List<byte[]> getData(Location loc) {
 				List<byte[]> arrayList = new ArrayList<byte[]>();
 				arrayList.add(EncodingUtils.getAsciiBytes(loc.getLongitude()
 					+ ""));
@@ -82,9 +78,8 @@ public final class Position /* TODO extends Data */{
 			}
 
 			@Override
-			public <T, D> D parse(List<T> list, D objectToModify)
+			public <T> Position parse(List<T> list, Position pos)
 					throws ParserException {
-				Position pos = (Position) objectToModify;
 				try {
 					pos.longitude = listToDouble((List<Byte>) list);
 				} catch (NumberFormatException e) {
@@ -92,14 +87,13 @@ public final class Position /* TODO extends Data */{
 				} catch (UnsupportedEncodingException e) {
 					throw new ParserException("Malformed file", e);
 				}
-				return (D) pos;
+				return pos;
 			}
 		},
 		PROVIDER {
 
 			@Override
-			public <T> List<byte[]> getData(T data) {
-				Location loc = (Location) data;
+			public List<byte[]> getData(Location loc) {
 				List<byte[]> arrayList = new ArrayList<byte[]>();
 				arrayList.add(EncodingUtils.getAsciiBytes(loc.getProvider()
 					+ ""));
@@ -107,9 +101,8 @@ public final class Position /* TODO extends Data */{
 			}
 
 			@Override
-			public <T, D> D parse(List<T> list, D objectToModify)
+			public <T> Position parse(List<T> list, Position pos)
 					throws ParserException {
-				Position pos = (Position) objectToModify;
 				try {
 					pos.provider = listToString((List<Byte>) list,
 						FileStore.FILES_ENCODING);
@@ -118,7 +111,7 @@ public final class Position /* TODO extends Data */{
 				} catch (UnsupportedEncodingException e) {
 					throw new ParserException("Malformed file", e);
 				}
-				return (D) pos;
+				return pos;
 			}
 		};
 
@@ -127,7 +120,7 @@ public final class Position /* TODO extends Data */{
 			return false; // no lists here
 		}
 
-		public static <T> List<byte[]> createListOfByteArrays(T data) {
+		public static List<byte[]> createListOfByteArrays(Location data) {
 			final List<byte[]> listByteArrays = new ArrayList<byte[]>();
 			for (LocationFields bs : LocationFields.values()) {
 				listByteArrays.add(bs.getData(data).get(0));

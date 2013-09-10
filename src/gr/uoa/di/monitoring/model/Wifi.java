@@ -17,12 +17,13 @@ public final class Wifi {
 	private long time;
 	private List<Network> networks = new ArrayList<Wifi.Network>();
 
-	public static enum WifiFields implements FileStore.Fields {
+	public static enum WifiFields implements
+			FileStore.Fields<List<ScanResult>, Wifi> {
 		TIME(false) {
 
 			@Override
-			public <T> List<byte[]> getData(T data) {
-				// TODO time()
+			public List<byte[]> getData(List<ScanResult> scanRes) {
+				// NB : I just get the time of the method invocation - TODO time
 				List<byte[]> arrayList = new ArrayList<byte[]>();
 				arrayList.add(EncodingUtils.getAsciiBytes(System
 						.currentTimeMillis() + ""));
@@ -30,9 +31,7 @@ public final class Wifi {
 			}
 
 			@Override
-			public <T, D> D parse(List<T> list, D objectToModify)
-					throws ParserException {
-				Wifi wi = (Wifi) objectToModify;
+			public <T> Wifi parse(List<T> list, Wifi wi) throws ParserException {
 				try {
 					// yeah when the Field has lists all List<T> are
 					// List<List<Byte>>
@@ -42,14 +41,13 @@ public final class Wifi {
 				} catch (UnsupportedEncodingException e) {
 					throw new ParserException("Malformed file", e);
 				}
-				return (D) wi;
+				return wi;
 			}
 		},
 		SSID(true) {
 
 			@Override
-			public <T> List<byte[]> getData(T data) {
-				List<ScanResult> scanRes = (List<ScanResult>) data;
+			public List<byte[]> getData(List<ScanResult> scanRes) {
 				List<byte[]> arrayList = new ArrayList<byte[]>();
 				if (scanRes != null) {
 					for (ScanResult loc : scanRes) {
@@ -60,9 +58,7 @@ public final class Wifi {
 			}
 
 			@Override
-			public <T, D> D parse(List<T> list, D objectToModify)
-					throws ParserException {
-				final Wifi wi = (Wifi) objectToModify;
+			public <T> Wifi parse(List<T> list, Wifi wi) throws ParserException {
 				final List<List<Byte>> doubleList = (List<List<Byte>>) list;
 				final List<Network> nets = wi.networks;
 				try {
@@ -79,14 +75,13 @@ public final class Wifi {
 				} catch (UnsupportedEncodingException e) {
 					throw new ParserException("Malformed file", e);
 				}
-				return (D) wi;
+				return wi;
 			}
 		},
 		BSSID(true) {
 
 			@Override
-			public <T> List<byte[]> getData(T data) {
-				List<ScanResult> scanRes = (List<ScanResult>) data;
+			public List<byte[]> getData(List<ScanResult> scanRes) {
 				List<byte[]> arrayList = new ArrayList<byte[]>();
 				if (scanRes != null) {
 					for (ScanResult loc : scanRes) {
@@ -97,9 +92,7 @@ public final class Wifi {
 			}
 
 			@Override
-			public <T, D> D parse(List<T> list, D objectToModify)
-					throws ParserException {
-				final Wifi wi = (Wifi) objectToModify;
+			public <T> Wifi parse(List<T> list, Wifi wi) throws ParserException {
 				final List<List<Byte>> doubleList = (List<List<Byte>>) list;
 				final List<Network> nets = wi.networks;
 				try {
@@ -123,14 +116,13 @@ public final class Wifi {
 					throw new ParserException(
 							"Malformed file : extra BSSIDs with no SSID", e);
 				}
-				return (D) wi;
+				return wi;
 			}
 		},
 		FREQUENCY(true) {
 
 			@Override
-			public <T> List<byte[]> getData(T data) {
-				List<ScanResult> scanRes = (List<ScanResult>) data;
+			public List<byte[]> getData(List<ScanResult> scanRes) {
 				List<byte[]> arrayList = new ArrayList<byte[]>();
 				if (scanRes != null) {
 					for (ScanResult loc : scanRes) {
@@ -142,9 +134,7 @@ public final class Wifi {
 			}
 
 			@Override
-			public <T, D> D parse(List<T> list, D objectToModify)
-					throws ParserException {
-				final Wifi wi = (Wifi) objectToModify;
+			public <T> Wifi parse(List<T> list, Wifi wi) throws ParserException {
 				final List<List<Byte>> doubleList = (List<List<Byte>>) list;
 				final List<Network> nets = wi.networks;
 				try {
@@ -169,14 +159,13 @@ public final class Wifi {
 							"Malformed file : extra frequencies with no "
 								+ "frequencies", e);
 				}
-				return (D) wi;
+				return wi;
 			}
 		},
 		LEVEL(true) {
 
 			@Override
-			public <T> List<byte[]> getData(T data) {
-				List<ScanResult> scanRes = (List<ScanResult>) data;
+			public List<byte[]> getData(List<ScanResult> scanRes) {
 				List<byte[]> arrayList = new ArrayList<byte[]>();
 				if (scanRes != null) {
 					for (ScanResult loc : scanRes) {
@@ -188,9 +177,7 @@ public final class Wifi {
 			}
 
 			@Override
-			public <T, D> D parse(List<T> list, D objectToModify)
-					throws ParserException {
-				final Wifi wi = (Wifi) objectToModify;
+			public <T> Wifi parse(List<T> list, Wifi wi) throws ParserException {
 				final List<List<Byte>> doubleList = (List<List<Byte>>) list;
 				final List<Network> nets = wi.networks;
 				try {
@@ -214,7 +201,7 @@ public final class Wifi {
 					throw new ParserException(
 							"Malformed file : extra level with no SSIDs", e);
 				}
-				return (D) wi;
+				return wi;
 			}
 		};
 
@@ -229,7 +216,7 @@ public final class Wifi {
 			return isList;
 		}
 
-		public static <T> List<byte[]> createListOfByteArrays(T data) {
+		public static List<byte[]> createListOfByteArrays(List<ScanResult> data) {
 			final List<byte[]> listByteArrays = new ArrayList<byte[]>();
 			for (WifiFields bs : WifiFields.values()) {
 				if (!bs.isList()) listByteArrays.add(bs.getData(data).get(0));
@@ -237,8 +224,8 @@ public final class Wifi {
 			return listByteArrays;
 		}
 
-		public static <T> List<List<byte[]>> createListOfListsOfByteArrays(
-				T data) {
+		public static List<List<byte[]>> createListOfListsOfByteArrays(
+				List<ScanResult> data) {
 			final List<List<byte[]>> listofListsOfByteArrays = new ArrayList<List<byte[]>>();
 			for (WifiFields bs : WifiFields.values()) {
 				if (bs.isList()) listofListsOfByteArrays.add(bs.getData(data));
