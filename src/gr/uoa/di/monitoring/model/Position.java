@@ -21,7 +21,7 @@ public final class Position /* TODO extends Data */{
 	private String provider;
 
 	public static enum LocationFields implements
-			FileStore.Fields<Location, Position> {
+			FileStore.Fields<Location, Position, Byte> {
 		TIME {
 
 			@Override
@@ -32,10 +32,10 @@ public final class Position /* TODO extends Data */{
 			}
 
 			@Override
-			public <T> Position parse(List<T> list, Position pos)
+			public Position parse(List<Byte> list, Position pos)
 					throws ParserException {
 				try {
-					pos.time = listToLong((List<Byte>) list);
+					pos.time = listToLong(list);
 				} catch (NumberFormatException e) {
 					throw new ParserException("Malformed file", e);
 				} catch (UnsupportedEncodingException e) {
@@ -55,10 +55,10 @@ public final class Position /* TODO extends Data */{
 			}
 
 			@Override
-			public <T> Position parse(List<T> list, Position pos)
+			public Position parse(List<Byte> list, Position pos)
 					throws ParserException {
 				try {
-					pos.latitude = listToDouble((List<Byte>) list);
+					pos.latitude = listToDouble(list);
 				} catch (NumberFormatException e) {
 					throw new ParserException("Malformed file", e);
 				} catch (UnsupportedEncodingException e) {
@@ -78,10 +78,10 @@ public final class Position /* TODO extends Data */{
 			}
 
 			@Override
-			public <T> Position parse(List<T> list, Position pos)
+			public Position parse(List<Byte> list, Position pos)
 					throws ParserException {
 				try {
-					pos.longitude = listToDouble((List<Byte>) list);
+					pos.longitude = listToDouble(list);
 				} catch (NumberFormatException e) {
 					throw new ParserException("Malformed file", e);
 				} catch (UnsupportedEncodingException e) {
@@ -101,11 +101,10 @@ public final class Position /* TODO extends Data */{
 			}
 
 			@Override
-			public <T> Position parse(List<T> list, Position pos)
+			public Position parse(List<Byte> list, Position pos)
 					throws ParserException {
 				try {
-					pos.provider = listToString((List<Byte>) list,
-						FileStore.FILES_ENCODING);
+					pos.provider = listToString(list, FileStore.FILES_ENCODING);
 				} catch (NumberFormatException e) {
 					throw new ParserException("Malformed file", e);
 				} catch (UnsupportedEncodingException e) {

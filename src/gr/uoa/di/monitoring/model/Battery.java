@@ -27,7 +27,7 @@ public final class Battery {
 		return "Hello server";
 	}
 
-	public static enum BatteryFields implements Fields<Intent, Battery> {
+	public static enum BatteryFields implements Fields<Intent, Battery, Byte> {
 		TIME {
 
 			@Override
@@ -40,10 +40,10 @@ public final class Battery {
 			}
 
 			@Override
-			public <T> Battery parse(List<T> list, Battery bat)
+			public Battery parse(List<Byte> list, Battery bat)
 					throws ParserException {
 				try {
-					bat.time = listToLong((List<Byte>) list);
+					bat.time = listToLong(list);
 				} catch (NumberFormatException e) {
 					throw new ParserException("Malformed file", e);
 				} catch (UnsupportedEncodingException e) {
@@ -63,10 +63,10 @@ public final class Battery {
 			}
 
 			@Override
-			public <T> Battery parse(List<T> list, Battery bat)
+			public Battery parse(List<Byte> list, Battery bat)
 					throws ParserException {
 				try {
-					bat.status = listToString((List<Byte>) list,
+					bat.status = listToString(list,
 						FileStore.FILES_ENCODING);
 					return bat;
 				} catch (UnsupportedEncodingException e) {
@@ -90,15 +90,17 @@ public final class Battery {
 	}
 
 	// TODO move this into base class Data and make it abstract
-	public List<Battery> parse(File f) throws IOException, ParserException {
+	public static List<Battery> parse(File f) throws IOException,
+			ParserException {
 		final FileInputStream fis = new FileInputStream(f);
-		List<EnumMap<BatteryFields, Object>> entries = FileStore.getEntries(
+		List<EnumMap<BatteryFields, List<Byte>>> entries = FileStore
+				.getEntries(
 			fis, BatteryFields.class);
-		List<Battery> data = new ArrayList<Battery>();
-		for (EnumMap<BatteryFields, Object> enumMap : entries) {
+		final List<Battery> data = new ArrayList<Battery>();
+		for (EnumMap<BatteryFields, List<Byte>> enumMap : entries) {
 			Battery bat = new Battery();
 			for (BatteryFields field : enumMap.keySet()) {
-				field.parse((List<Byte>) enumMap.get(field), bat);
+				field.parse(enumMap.get(field), bat);
 			}
 		}
 		return data;

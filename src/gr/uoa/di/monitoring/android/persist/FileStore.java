@@ -76,7 +76,7 @@ public final class FileStore {
 	 *             if the {@code file} is not found
 	 * @throws IOException
 	 */
-	public static <T extends Enum<T> & Fields<?, ?>> void persist(
+	public static <T extends Enum<T> & Fields<?, ?, ?>> void persist(
 			final File file, final Class<T> fields,
 			final List<byte[]> listByteArrays,
 			final List<List<byte[]>> listsOfByteArrays)
@@ -131,7 +131,7 @@ public final class FileStore {
 		FileIO.append(file, result);
 	}
 
-	public static <T extends Enum<T> & Fields<K, Y>, K, Y> void persist(
+	public static <T extends Enum<T> & Fields<?, ?, ?>> void persist(
 			final File file, final Class<T> fields, final String encodingName,
 			final List<String> data, final List<String>... listsOfData)
 			throws FileNotFoundException, UnsupportedEncodingException,
@@ -195,14 +195,14 @@ public final class FileStore {
 		return result;
 	}
 
-	public static interface Fields<T, D> {
+	public static interface Fields<T, D, K> {
 
 		// <T> List<byte[]> createListOfByteArrays(T data);
 		boolean isList();
 
 		List<byte[]> getData(T data);
 
-		<K> D parse(List<K> list, D objectToModify) throws ParserException;
+		D parse(List<K> list, D objectToModify) throws ParserException;
 	}
 
 	// public static <T> T[] concat(T[] first, T[] second) {
@@ -225,7 +225,7 @@ public final class FileStore {
 	 *         bytes for fields where isList() returns true
 	 * @throws IOException
 	 */
-	public static <D, T extends Enum<T> & Fields<?, ?>> List<EnumMap<T, D>> getEntries(
+	public static <D, T extends Enum<T> & Fields<?, ?, D>> List<EnumMap<T, List<D>>> getEntries(
 			InputStream is, Class<T> fields) throws IOException {
 		BufferedInputStream bis = new BufferedInputStream(is,
 				INPUT_STEAM_BUFFER_SIZE);
@@ -302,11 +302,11 @@ public final class FileStore {
 				}
 			}
 		}
-		return (List<EnumMap<T, D>>) daBytes;
+		return (List<EnumMap<T, List<D>>>) daBytes;
 	}
 
 	// That's what you get for nor being able to override static methods
-	private static <T extends Enum<T> & Fields<?, ?>> boolean hasLists(
+	private static <T extends Enum<T> & Fields<?, ?, ?>> boolean hasLists(
 			Class<T> fields) {
 		boolean hasLists = false;
 		for (T field : fields.getEnumConstants()) {

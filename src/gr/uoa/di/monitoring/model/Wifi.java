@@ -18,7 +18,7 @@ public final class Wifi {
 	private List<Network> networks = new ArrayList<Wifi.Network>();
 
 	public static enum WifiFields implements
-			FileStore.Fields<List<ScanResult>, Wifi> {
+			FileStore.Fields<List<ScanResult>, Wifi, List<Byte>> {
 		TIME(false) {
 
 			@Override
@@ -31,11 +31,12 @@ public final class Wifi {
 			}
 
 			@Override
-			public <T> Wifi parse(List<T> list, Wifi wi) throws ParserException {
+			public Wifi parse(List<List<Byte>> list, Wifi wi)
+					throws ParserException {
 				try {
 					// yeah when the Field has lists all List<T> are
 					// List<List<Byte>>
-					wi.time = listToLong(((List<List<Byte>>) list).get(0));
+					wi.time = listToLong(list.get(0));
 				} catch (NumberFormatException e) {
 					throw new ParserException("Malformed file", e);
 				} catch (UnsupportedEncodingException e) {
@@ -58,11 +59,11 @@ public final class Wifi {
 			}
 
 			@Override
-			public <T> Wifi parse(List<T> list, Wifi wi) throws ParserException {
-				final List<List<Byte>> doubleList = (List<List<Byte>>) list;
+			public Wifi parse(List<List<Byte>> list, Wifi wi)
+					throws ParserException {
 				final List<Network> nets = wi.networks;
 				try {
-					for (List<Byte> lb : doubleList) {
+					for (List<Byte> lb : list) {
 						String ssid = listToString(lb, FileStore.FILES_ENCODING);
 						// FIXME TODO networks first created here
 						// TODO check what do I do with empty null SSIDs ?
@@ -92,13 +93,13 @@ public final class Wifi {
 			}
 
 			@Override
-			public <T> Wifi parse(List<T> list, Wifi wi) throws ParserException {
-				final List<List<Byte>> doubleList = (List<List<Byte>>) list;
+			public Wifi parse(List<List<Byte>> list, Wifi wi)
+					throws ParserException {
 				final List<Network> nets = wi.networks;
 				try {
 					{
 						int i = 0;
-						for (List<Byte> lb : doubleList) {
+						for (List<Byte> lb : list) {
 							String bssid = listToString(lb,
 								FileStore.FILES_ENCODING);
 							Network n = nets.get(i++);
@@ -134,13 +135,13 @@ public final class Wifi {
 			}
 
 			@Override
-			public <T> Wifi parse(List<T> list, Wifi wi) throws ParserException {
-				final List<List<Byte>> doubleList = (List<List<Byte>>) list;
+			public Wifi parse(List<List<Byte>> list, Wifi wi)
+					throws ParserException {
 				final List<Network> nets = wi.networks;
 				try {
 					{
 						int i = 0;
-						for (List<Byte> lb : doubleList) {
+						for (List<Byte> lb : list) {
 							int freq = (int) listToLong(lb);
 							Network n = nets.get(i++);
 							n.frequency = freq;
@@ -177,13 +178,13 @@ public final class Wifi {
 			}
 
 			@Override
-			public <T> Wifi parse(List<T> list, Wifi wi) throws ParserException {
-				final List<List<Byte>> doubleList = (List<List<Byte>>) list;
+			public Wifi parse(List<List<Byte>> list, Wifi wi)
+					throws ParserException {
 				final List<Network> nets = wi.networks;
 				try {
 					{
 						int i = 0;
-						for (List<Byte> lb : doubleList) {
+						for (List<Byte> lb : list) {
 							int level = (int) listToLong(lb);
 							Network n = nets.get(i++);
 							n.level = level;
