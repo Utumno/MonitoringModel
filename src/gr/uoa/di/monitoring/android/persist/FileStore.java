@@ -20,7 +20,7 @@ public final class FileStore {
 	private static final byte DELIMITER = 0;
 	private static final byte ARRAY_DELIMITER = 1;
 	private static final byte NEWLINE = '\n';
-	private static final int INPUT_STEAM_BUFFER_SIZE = 8192; // vanilla default
+	private static final int INPUT_STREAM_BUFFER_SIZE = 8192; // vanilla default
 	/**
 	 * The parsers need to create strings from the files they parse - this field
 	 * specifies the expected encoding of the files. Should be used by monitors
@@ -48,7 +48,10 @@ public final class FileStore {
 		byte[] result = listOfArraysToByteArray(listByteArrays, DELIMITER,
 			new byte[0]);
 		result[result.length - 1] = NEWLINE;
-		FileIO.append(file, result);
+		synchronized (FileIO.FILE_STORE_LOCK) { // FIXME : pay attention not to
+			// delete the dir
+			FileIO.append(file, result);
+		}
 	}
 
 	/**
@@ -67,7 +70,6 @@ public final class FileStore {
 	 *
 	 * @param <T>
 	 *            must be an enum that extends Fields
-	 *
 	 * @param file
 	 * @param fields
 	 * @param listByteArrays
@@ -96,7 +98,10 @@ public final class FileStore {
 			}
 		}
 		result[result.length - 1] = NEWLINE;
-		FileIO.append(file, result);
+		synchronized (FileIO.FILE_STORE_LOCK) { // FIXME : pay attention not to
+			// delete the dir
+			FileIO.append(file, result);
+		}
 	}
 
 	// helpers
@@ -120,7 +125,7 @@ public final class FileStore {
 	}
 
 	// =========================================================================
-	// String versions
+	// String versions // FIXME locks or maybe delete them alltogether
 	// =========================================================================
 	public static void persist(File file, String encodingName,
 			List<String> listString) throws FileNotFoundException,
@@ -228,7 +233,7 @@ public final class FileStore {
 	public static <D, T extends Enum<T> & Fields<?, ?, D>> List<EnumMap<T, D>> getEntries(
 			InputStream is, Class<T> fields) throws IOException {
 		BufferedInputStream bis = new BufferedInputStream(is,
-				INPUT_STEAM_BUFFER_SIZE);
+				INPUT_STREAM_BUFFER_SIZE);
 		final List<List<Byte>> entries = new ArrayList<List<Byte>>();
 		{
 			// get the entries
