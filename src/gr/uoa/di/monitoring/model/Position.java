@@ -21,7 +21,7 @@ public final class Position /* TODO extends Data */{
 	private String provider;
 
 	public static enum LocationFields implements
-			FileStore.Fields<Location, Position, Byte> {
+			FileStore.Fields<Location, Position, List<Byte>> {
 		TIME {
 
 			@Override

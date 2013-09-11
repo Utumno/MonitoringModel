@@ -202,7 +202,7 @@ public final class FileStore {
 
 		List<byte[]> getData(T data);
 
-		D parse(List<K> list, D objectToModify) throws ParserException;
+		D parse(K list, D objectToModify) throws ParserException;
 	}
 
 	// public static <T> T[] concat(T[] first, T[] second) {
@@ -225,7 +225,7 @@ public final class FileStore {
 	 *         bytes for fields where isList() returns true
 	 * @throws IOException
 	 */
-	public static <D, T extends Enum<T> & Fields<?, ?, D>> List<EnumMap<T, List<D>>> getEntries(
+	public static <D, T extends Enum<T> & Fields<?, ?, D>> List<EnumMap<T, D>> getEntries(
 			InputStream is, Class<T> fields) throws IOException {
 		BufferedInputStream bis = new BufferedInputStream(is,
 				INPUT_STEAM_BUFFER_SIZE);
@@ -302,7 +302,7 @@ public final class FileStore {
 				}
 			}
 		}
-		return (List<EnumMap<T, List<D>>>) daBytes;
+		return (List<EnumMap<T, D>>) daBytes;
 	}
 
 	// That's what you get for nor being able to override static methods

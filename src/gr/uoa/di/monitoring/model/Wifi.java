@@ -18,7 +18,7 @@ public final class Wifi {
 	private List<Network> networks = new ArrayList<Wifi.Network>();
 
 	public static enum WifiFields implements
-			FileStore.Fields<List<ScanResult>, Wifi, List<Byte>> {
+			FileStore.Fields<List<ScanResult>, Wifi, List<List<Byte>>> {
 		TIME(false) {
 
 			@Override

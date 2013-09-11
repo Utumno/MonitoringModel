@@ -27,7 +27,8 @@ public final class Battery {
 		return "Hello server";
 	}
 
-	public static enum BatteryFields implements Fields<Intent, Battery, Byte> {
+	public static enum BatteryFields implements
+			Fields<Intent, Battery, List<Byte>> {
 		TIME {
 
 			@Override
@@ -66,8 +67,7 @@ public final class Battery {
 			public Battery parse(List<Byte> list, Battery bat)
 					throws ParserException {
 				try {
-					bat.status = listToString(list,
-						FileStore.FILES_ENCODING);
+					bat.status = listToString(list, FileStore.FILES_ENCODING);
 					return bat;
 				} catch (UnsupportedEncodingException e) {
 					throw new ParserException("Malformed file", e);
@@ -94,8 +94,7 @@ public final class Battery {
 			ParserException {
 		final FileInputStream fis = new FileInputStream(f);
 		List<EnumMap<BatteryFields, List<Byte>>> entries = FileStore
-				.getEntries(
-			fis, BatteryFields.class);
+				.getEntries(fis, BatteryFields.class);
 		final List<Battery> data = new ArrayList<Battery>();
 		for (EnumMap<BatteryFields, List<Byte>> enumMap : entries) {
 			Battery bat = new Battery();
