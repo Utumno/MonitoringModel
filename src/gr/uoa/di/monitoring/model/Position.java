@@ -4,21 +4,30 @@ import static gr.uoa.di.java.helpers.Utils.listToDouble;
 import static gr.uoa.di.java.helpers.Utils.listToLong;
 import static gr.uoa.di.java.helpers.Utils.listToString;
 import gr.uoa.di.monitoring.android.persist.FileStore;
+import gr.uoa.di.monitoring.android.persist.FileStore.Fields;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.http.util.EncodingUtils;
 
+import android.content.Context;
 import android.location.Location;
 
-public final class Position /* TODO extends Data */{
+public final class Position extends Data {
 
 	private long time;
 	private double latitude;
 	private double longitude;
 	private String provider;
+	private static final String FILE_PREFIX = "loc";
+
+	public Position(String imei) {
+		super(imei);
+	}
 
 	public static enum LocationFields implements
 			FileStore.Fields<Location, Position, List<Byte>> {
@@ -128,6 +137,15 @@ public final class Position /* TODO extends Data */{
 		}
 	}
 
+	public static <T extends Enum<T> & Fields<?, ?, ?>> void saveData(
+			Context ctx, List<byte[]> listByteArrays)
+			throws FileNotFoundException, IOException {
+		FileStore.saveData(ctx, FILE_PREFIX, listByteArrays);
+	}
+
+	// =========================================================================
+	// Accessors
+	// =========================================================================
 	public long getTime() {
 		return time;
 	}

@@ -1,5 +1,7 @@
 package gr.uoa.di.monitoring.android.persist;
 
+import gr.uoa.di.android.helpers.DeviceIdentifier;
+import gr.uoa.di.android.helpers.DeviceIdentifier.DeviceIDException;
 import gr.uoa.di.android.helpers.FileIO;
 import gr.uoa.di.java.helpers.Utils;
 import gr.uoa.di.monitoring.model.ParserException;
@@ -14,7 +16,11 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 
+import android.content.Context; // TODO : .... coupling
+
 public final class FileStore {
+
+	private FileStore() {}
 
 	// TODO : can any of my data contain those delimiters ?
 	private static final byte DELIMITER = 0;
@@ -27,9 +33,83 @@ public final class FileStore {
 	 * whenever they write text files also TODO
 	 */
 	public static final String FILES_ENCODING = Utils.UTF8;
+	// =========================================================================
+	// Persistence
+	// =========================================================================
+	private static final String NO_IMEI = "NO_IMEI";
+	/** ALWAYS access this via {@link #getRootFolder(Context)} */
+	private static File sRootFolder; // TODO : cache but can lead to NPEs
 
-	private FileStore() {}
+	/**
+	 * Returns the root folder in internal storage where the data is kept.
+	 * {@code sRootFolder} must ONLY be accessed via this method. For now this
+	 * folder is named according to a device UUID as returned by
+	 * {@link DeviceIdentifier#getDeviceIdentifier(Context, boolean)} - this is
+	 * subject to change
+	 *
+	 * @param ctx
+	 *            the Android context of the Monitors
+	 * @return the root folder where the data files are saved
+	 * @throws IOException
+	 */
+	public static synchronized File getRootFolder(Context ctx)
+			throws IOException {
+		if (sRootFolder == null) {
+			synchronized (FileStore.class) {
+				String rootFoldername;
+				if (sRootFolder == null) {
+					try {
+						rootFoldername = DeviceIdentifier.getDeviceIdentifier(
+							ctx, false);
+					} catch (DeviceIDException e) {
+						// w("No imei today : " + e);
+						rootFoldername = NO_IMEI;
+					}
+					sRootFolder = FileIO.createDirInternal(ctx, rootFoldername);
+				}
+			}
+		}
+		return sRootFolder;
+	}
 
+	/**
+	 * Returns a File instance representing a file in an internal directory. The
+	 * internalDir specified must exist and be a directory.
+	 *
+	 * @param internalDir
+	 * @param filename
+	 * @return
+	 * @throws IOException
+	 */
+	private static File dataFileInInternalStorage(File internalDir,
+			String filename) throws IOException {
+		// File internalDir = FileIO.createDirInternal(ctx, sRootFolder);
+		if (internalDir.exists() && internalDir.isDirectory())
+			return new File(internalDir, filename);
+		throw new IOException(internalDir.getAbsolutePath()
+			+ " does not exist or is not a directory.");
+	}
+
+	public static void saveData(Context ctx, String filename,
+			List<byte[]> listByteArrays) throws FileNotFoundException,
+			IOException {
+		// internal storage
+		FileStore.persist(
+			dataFileInInternalStorage(FileStore.getRootFolder(ctx), filename),
+			listByteArrays);
+	}
+
+	public static <T extends Enum<T> & Fields<?, ?, ?>> void saveData(
+			Context ctx, String filename, List<byte[]> listByteArrays,
+			List<List<byte[]>> listOfListsOfByteArrays, Class<T> fields)
+			throws FileNotFoundException, IOException {
+		// internal storage
+		FileStore.persist(
+			dataFileInInternalStorage(FileStore.getRootFolder(ctx), filename),
+			fields, listByteArrays, listOfListsOfByteArrays);
+	}
+
+	// TODO : I leak implementation into docs
 	/**
 	 * Persists the items (arrays of bytes) contained in {@code listByteArrays}
 	 * in the given {@code file} which may lie in external or internal storage.
@@ -125,7 +205,7 @@ public final class FileStore {
 	}
 
 	// =========================================================================
-	// String versions // FIXME locks or maybe delete them alltogether
+	// String versions // FIXME locks or maybe delete them altogether
 	// =========================================================================
 	public static void persist(File file, String encodingName,
 			List<String> listString) throws FileNotFoundException,
@@ -200,6 +280,9 @@ public final class FileStore {
 		return result;
 	}
 
+	// =========================================================================
+	// Fields
+	// =========================================================================
 	public static interface Fields<T, D, K> {
 
 		// <T> List<byte[]> createListOfByteArrays(T data);

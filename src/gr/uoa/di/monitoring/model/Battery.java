@@ -7,6 +7,7 @@ import gr.uoa.di.monitoring.android.persist.FileStore.Fields;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -15,13 +16,19 @@ import java.util.List;
 
 import org.apache.http.util.EncodingUtils;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.BatteryManager;
 
-public final class Battery {
+public final class Battery extends Data {
+
+	public Battery(String imei) {
+		super(imei);
+	}
 
 	private long time;
 	private String status;
+	private static final String FILE_PREFIX = "batt";
 
 	public static String hallo() {
 		return "Hello server";
@@ -90,14 +97,14 @@ public final class Battery {
 	}
 
 	// TODO move this into base class Data and make it abstract
-	public static List<Battery> parse(File f) throws IOException,
+	public static List<Battery> parse(File f, String imei) throws IOException,
 			ParserException {
 		final FileInputStream fis = new FileInputStream(f);
 		List<EnumMap<BatteryFields, List<Byte>>> entries = FileStore
 				.getEntries(fis, BatteryFields.class);
 		final List<Battery> data = new ArrayList<Battery>();
 		for (EnumMap<BatteryFields, List<Byte>> enumMap : entries) {
-			Battery bat = new Battery();
+			Battery bat = new Battery(imei);
 			for (BatteryFields field : enumMap.keySet()) {
 				field.parse(enumMap.get(field), bat);
 			}
@@ -105,6 +112,15 @@ public final class Battery {
 		return data;
 	}
 
+	public static <T extends Enum<T> & Fields<?, ?, ?>> void saveData(
+			Context ctx, List<byte[]> listByteArrays)
+			throws FileNotFoundException, IOException {
+		FileStore.saveData(ctx, FILE_PREFIX, listByteArrays);
+	}
+
+	// =========================================================================
+	// Accessors
+	// =========================================================================
 	public long getTime() {
 		return time;
 	}
