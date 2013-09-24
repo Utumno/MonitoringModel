@@ -30,6 +30,7 @@ public final class Battery extends Data {
 	private String status;
 	private static final String FILE_PREFIX = "batt";
 
+	// TODO : delete me
 	public static String hallo() {
 		return "Hello server";
 	}
@@ -116,6 +117,11 @@ public final class Battery extends Data {
 			Context ctx, List<byte[]> listByteArrays)
 			throws FileNotFoundException, IOException {
 		FileStore.saveData(ctx, FILE_PREFIX, listByteArrays);
+	}
+
+	@Override
+	public String getFilename() {
+		return FILE_PREFIX;
 	}
 
 	// =========================================================================

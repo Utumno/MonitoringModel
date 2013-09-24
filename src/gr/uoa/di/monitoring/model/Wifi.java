@@ -276,6 +276,11 @@ public final class Wifi extends Data {
 			listOfListsOfByteArrays, fields);
 	}
 
+	@Override
+	public String getFilename() {
+		return FILE_PREFIX;
+	}
+
 	// =========================================================================
 	// Accessors
 	// =========================================================================

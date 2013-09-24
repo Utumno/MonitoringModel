@@ -143,6 +143,11 @@ public final class Position extends Data {
 		FileStore.saveData(ctx, FILE_PREFIX, listByteArrays);
 	}
 
+	@Override
+	public String getFilename() {
+		return FILE_PREFIX;
+	}
+
 	// =========================================================================
 	// Accessors
 	// =========================================================================

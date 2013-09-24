@@ -3,6 +3,7 @@ package gr.uoa.di.monitoring.android.persist;
 import gr.uoa.di.android.helpers.DeviceIdentifier;
 import gr.uoa.di.android.helpers.DeviceIdentifier.DeviceIDException;
 import gr.uoa.di.android.helpers.FileIO;
+import gr.uoa.di.android.helpers.Zip.CompressException;
 import gr.uoa.di.java.helpers.Utils;
 import gr.uoa.di.monitoring.model.ParserException;
 
@@ -33,17 +34,20 @@ public final class FileStore {
 	 * whenever they write text files also TODO
 	 */
 	public static final String FILES_ENCODING = Utils.UTF8;
+	public static final Object FILE_STORE_LOCK = new Object();
 	// =========================================================================
 	// Persistence
 	// =========================================================================
 	private static final String NO_IMEI = "NO_IMEI";
 	/** ALWAYS access this via {@link #getRootFolder(Context)} */
-	private static File sRootFolder; // TODO : cache but can lead to NPEs
+	private static File sRootFolder; // TODO : cache but can lead to NPEs - ask
+	// : enforce access to static fields via getter
 
 	/**
-	 * Returns the root folder in internal storage where the data is kept.
-	 * {@code sRootFolder} must ONLY be accessed via this method. For now this
-	 * folder is named according to a device UUID as returned by
+	 * Returns the root folder in internal storage where the data is kept. Will
+	 * create it if it does not exist. {@code sRootFolder} must ONLY be accessed
+	 * via this method. For now this folder is named according to a device UUID
+	 * as returned by
 	 * {@link DeviceIdentifier#getDeviceIdentifier(Context, boolean)} - this is
 	 * subject to change
 	 *
@@ -51,8 +55,9 @@ public final class FileStore {
 	 *            the Android context of the Monitors
 	 * @return the root folder where the data files are saved
 	 * @throws IOException
+	 *             if the directory does not exist and fails to create it
 	 */
-	public static synchronized File getRootFolder(Context ctx)
+	private static synchronized File getRootFolder(Context ctx)
 			throws IOException {
 		if (sRootFolder == null) {
 			synchronized (FileStore.class) {
@@ -90,6 +95,7 @@ public final class FileStore {
 			+ " does not exist or is not a directory.");
 	}
 
+	// public
 	public static void saveData(Context ctx, String filename,
 			List<byte[]> listByteArrays) throws FileNotFoundException,
 			IOException {
@@ -109,13 +115,10 @@ public final class FileStore {
 			fields, listByteArrays, listOfListsOfByteArrays);
 	}
 
-	// TODO : I leak implementation into docs
 	/**
 	 * Persists the items (arrays of bytes) contained in {@code listByteArrays}
 	 * in the given {@code file} which may lie in external or internal storage.
-	 * The bytes contained in each item in the list are persisted in turn and
-	 * are separated by the next chunk of bytes by DELIMITER. The last one is
-	 * followed by NEWLINE (not DELIMITER).
+	 * It acquires the {@code FILE_STORE_LOCK} to do so.
 	 *
 	 * @param file
 	 * @param listByteArrays
@@ -125,28 +128,23 @@ public final class FileStore {
 	public static void persist(final File file,
 			final List<byte[]> listByteArrays) throws FileNotFoundException,
 			IOException {
+		/*
+		 * The bytes contained in each item in the list are persisted in turn
+		 * and are separated by the next chunk of bytes by DELIMITER. The last
+		 * one is followed by NEWLINE (not DELIMITER).
+		 */
 		byte[] result = listOfArraysToByteArray(listByteArrays, DELIMITER,
 			new byte[0]);
 		result[result.length - 1] = NEWLINE;
-		synchronized (FileIO.FILE_STORE_LOCK) { // FIXME : pay attention not to
-			// delete the dir
+		synchronized (FILE_STORE_LOCK) {
 			FileIO.append(file, result);
 		}
 	}
 
 	/**
 	 * Persists the given data in the given {@code file} which may lie in
-	 * external or internal storage. Each item (chunk of bytes) is separated by
-	 * the next one by DELIMITER. The items may be either a byte[] (an element
-	 * of the {@code listByteArrays}), or a whole List<byte[]> (member of
-	 * {@code listsOfByteArrays}). In the latter case each byte[] belonging to
-	 * {@code listsOfByteArrays} is persisted in turn and separated by the next
-	 * by ARRAY_DELIMITER. The last array is separated by the next chunk by
-	 * DELIMITER as before. The order of the items is given by the order of the
-	 * Lists themselves in combination with the {@code fields} which also
-	 * provides the info whether the next item is to be retrieved from
-	 * {@code listsOfByteArrays} or {@code listByteArrays}. The last item is
-	 * followed by NEWLINE (not DELIMITER).
+	 * external or internal storage. It acquires the {@code FILE_STORE_LOCK} to
+	 * do so.
 	 *
 	 * @param <T>
 	 *            must be an enum that extends Fields
@@ -163,6 +161,19 @@ public final class FileStore {
 			final List<byte[]> listByteArrays,
 			final List<List<byte[]>> listsOfByteArrays)
 			throws FileNotFoundException, IOException {
+		/*
+		 * Each item (chunk of bytes) is separated by the next one by DELIMITER.
+		 * The items may be either a byte[] (an element of the {@code
+		 * listByteArrays}), or a whole List<byte[]> (member of {@code
+		 * listsOfByteArrays}). In the latter case each byte[] belonging to
+		 * {@code listsOfByteArrays} is persisted in turn and separated by the
+		 * next by ARRAY_DELIMITER. The last array is separated by the next
+		 * chunk by DELIMITER as before. The order of the items is given by the
+		 * order of the Lists themselves in combination with the {@code fields}
+		 * which also provides the info whether the next item is to be retrieved
+		 * from {@code listsOfByteArrays} or {@code listByteArrays}. The last
+		 * item is followed by NEWLINE (not DELIMITER).
+		 */
 		byte[] result = new byte[0];
 		int nextArray = 0;
 		int nextListOfArrays = 0;
@@ -178,9 +189,65 @@ public final class FileStore {
 			}
 		}
 		result[result.length - 1] = NEWLINE;
-		synchronized (FileIO.FILE_STORE_LOCK) { // FIXME : pay attention not to
-			// delete the dir
+		synchronized (FILE_STORE_LOCK) {
 			FileIO.append(file, result);
+		}
+	}
+
+	/**
+	 * Checks if there are available data by checking the size of the internal
+	 * directory where the data is saved. If the internal directory does not
+	 * exist this method will try to create it
+	 *
+	 * @param ctx
+	 *            needed to retrieve the internal directory
+	 * @return true if the directory exists (will exist except if IOException is
+	 *         thrown on creation) and is not empty, false otherwise
+	 * @throws IOException
+	 *             if the internal directory can't be created
+	 */
+	public static boolean availableData(Context ctx) throws IOException {
+		return !FileIO.isEmptyOrAbsent(getRootFolder(ctx)); // won't be absent,
+		// getRootFolder() will create it
+	}
+
+	/**
+	 * Returns a list of application files in the internal directory where the
+	 * data is saved. If the internal directory does not exist this method will
+	 * try to create it
+	 *
+	 * @param ctx
+	 *            needed to retrieve the internal directory
+	 * @return true if the directory exists and is not empty, false otherwise
+	 * @throws IOException
+	 *             if the internal directory can't be created
+	 */
+	public static List<File> internalFiles(Context ctx) throws IOException {
+		return FileIO.listFiles(getRootFolder(ctx));
+	}
+
+	/**
+	 * Returns a zip file containing the internal folder with the data files
+	 *
+	 * @param ctx
+	 *            Context needed to access the internal storage
+	 * @return a zip file containing the folder with the data files
+	 * @throws IOException
+	 *             if the internal folder can't be accessed or the zip file
+	 *             can't be created
+	 */
+	public static File file(Context ctx) throws IOException {
+		try {
+			final String rootPath = getRootFolder(ctx).getAbsolutePath();
+			final String destination = rootPath + "_"
+				+ System.currentTimeMillis();
+			return gr.uoa.di.android.helpers.Zip.zipFolder(rootPath,
+				destination).getFile();
+			// final String backFilename = System.currentTimeMillis() + ".zip";
+			// FileIO.copyFileFromInternalToExternalStorage(destination,
+			// LOG_DIR, backFilename);
+		} catch (CompressException e) {
+			throw new IOException("Unable to create zip file :" + e);
 		}
 	}
 
@@ -283,9 +350,22 @@ public final class FileStore {
 	// =========================================================================
 	// Fields
 	// =========================================================================
-	public static interface Fields<T, D, K> {
+	/**
+	 * Interface meant to be implemented by enums that encapsulate in their
+	 * constants the methods to get the Data needed from android objects and
+	 * parse the Lists of bytes from those serialized in the files sent to the
+	 * servers
+	 *
+	 * @param <T>
+	 *            the type of the data provided by android, ex. Location
+	 * @param <D>
+	 *            the corresponding type of the data in the model, ex. Position
+	 * @param <K>
+	 *            the list that the parser expects ({@code List<Byte>}or
+	 *            {@code List<List<Byte>>}
+	 */
+	public static interface Fields<T, D extends Data, K> {
 
-		// <T> List<byte[]> createListOfByteArrays(T data);
 		boolean isList();
 
 		List<byte[]> getData(T data);
@@ -293,16 +373,12 @@ public final class FileStore {
 		D parse(K list, D objectToModify) throws ParserException;
 	}
 
-	// public static <T> T[] concat(T[] first, T[] second) {
-	// T[] result = Arrays.copyOf(first, first.length + second.length); // NOT
-	// // fucki9ng available
-	// System.arraycopy(second, 0, result, first.length, second.length);
-	// return result;
-	// }
 	/**
-	 * Meant to be used in the server so uses Lists internally instead of arrays
-	 * Buffers the input stream so do not pass in a BufferedInputStream (TODO
-	 * ask - maybe not important)
+	 * Meant to be used in the server so uses Lists internally instead of
+	 * arrays. Buffers the input stream so do not pass in a BufferedInputStream
+	 * (TODO ask - maybe not important)
+	 *
+	 * @param <K>
 	 *
 	 * @param is
 	 *            an input stream
@@ -331,6 +407,7 @@ public final class FileStore {
 				else entries.get(line).add((byte) c);
 			}
 		}
+		// friggin FIXME : malformed files ? empty lines ?
 		final boolean hasLists = hasLists(fields);
 		List<D> daBytes;
 		if (hasLists) {

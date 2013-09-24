@@ -13,6 +13,13 @@ public abstract class Data {
 		this.imei = imei;
 	}
 
+	/**
+	 * Returns the filename the data are saved in for each Data subclass
+	 *
+	 * @return the filename the data are saved in
+	 */
+	public abstract String getFilename();
+
 	// =========================================================================
 	// Accessors
 	// =========================================================================
