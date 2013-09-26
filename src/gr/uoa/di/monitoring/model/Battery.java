@@ -11,6 +11,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.EnumMap;
 import java.util.List;
 
@@ -107,8 +108,9 @@ public final class Battery extends Data {
 		for (EnumMap<BatteryFields, List<Byte>> enumMap : entries) {
 			Battery bat = new Battery(imei);
 			for (BatteryFields field : enumMap.keySet()) {
-				field.parse(enumMap.get(field), bat);
+				/* bat = */field.parse(enumMap.get(field), bat);
 			}
+			data.add(bat);
 		}
 		return data;
 	}
@@ -122,6 +124,11 @@ public final class Battery extends Data {
 	@Override
 	public String getFilename() {
 		return FILE_PREFIX;
+	}
+
+	@Override
+	public String toString() {
+		return "Time : " + new Date(time) + N + "Status : " + status;
 	}
 
 	// =========================================================================

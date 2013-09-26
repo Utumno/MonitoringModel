@@ -5,10 +5,14 @@ import static gr.uoa.di.java.helpers.Utils.listToString;
 import gr.uoa.di.monitoring.android.persist.FileStore;
 import gr.uoa.di.monitoring.android.persist.FileStore.Fields;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.EnumMap;
 import java.util.List;
 
 import org.apache.http.util.EncodingUtils;
@@ -244,12 +248,35 @@ public final class Wifi extends Data {
 		}
 	}
 
+	// TODO move this into base class Data and make it abstract
+	public static List<Wifi> parse(File f, String imei) throws IOException,
+			ParserException {
+		final FileInputStream fis = new FileInputStream(f);
+		List<EnumMap<WifiFields, List<List<Byte>>>> entries = FileStore
+				.getEntries(fis, WifiFields.class);
+		final List<Wifi> data = new ArrayList<Wifi>();
+		for (EnumMap<WifiFields, List<List<Byte>>> enumMap : entries) {
+			Wifi bat = new Wifi(imei);
+			for (WifiFields field : enumMap.keySet()) {
+				/* bat = */field.parse(enumMap.get(field), bat);
+			}
+			data.add(bat);
+		}
+		return data;
+	}
+
 	public static class Network {
 
 		private String ssid;
 		private String bssid;
 		private int frequency;
 		private int level;
+
+		@Override
+		public String toString() {
+			return "Ssid=" + ssid + ", Bssid=" + bssid + ", Frequency="
+				+ frequency + ", Level=" + level;
+		}
 
 		public String getSsid() {
 			return new String(ssid);
@@ -279,6 +306,16 @@ public final class Wifi extends Data {
 	@Override
 	public String getFilename() {
 		return FILE_PREFIX;
+	}
+
+	@Override
+	public String toString() {
+		// TODO move to data the time part
+		final StringBuilder sb = new StringBuilder();
+		for (Network net : networks) {
+			sb.append(net).append(N);
+		}
+		return "Time : " + new Date(time) + N + sb.toString();
 	}
 
 	// =========================================================================

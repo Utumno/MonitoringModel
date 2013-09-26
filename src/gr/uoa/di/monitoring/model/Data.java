@@ -8,6 +8,7 @@ public abstract class Data {
 	 * preparing the ground for better unique identifiers
 	 */
 	private String imei;
+	static final String N = System.getProperty("line.separator");
 
 	public Data(String imei) {
 		this.imei = imei;
