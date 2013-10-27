@@ -12,7 +12,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.EnumMap;
 import java.util.List;
 
@@ -23,7 +22,6 @@ import android.location.Location;
 
 public final class Position extends Data {
 
-	private long time;
 	private double latitude;
 	private double longitude;
 	private String provider;
@@ -171,8 +169,7 @@ public final class Position extends Data {
 
 	@Override
 	public String toString() {
-		// TODO move to data the time part
-		return "Time : " + new Date(time) + N + "Longitude : " + longitude
+		return super.toString() + N + "Longitude : " + longitude
 			+ N + "Latitude : " + latitude + N + "Provider : " + provider;
 	}
 
@@ -180,10 +177,6 @@ public final class Position extends Data {
 	// =========================================================================
 	// Accessors
 	// =========================================================================
-	public long getTime() {
-		return time;
-	}
-
 	public double getLatitude() {
 		return latitude;
 	}
@@ -193,6 +186,6 @@ public final class Position extends Data {
 	}
 
 	public String getProvider() {
-		return new String(provider);
+		return provider;
 	}
 }

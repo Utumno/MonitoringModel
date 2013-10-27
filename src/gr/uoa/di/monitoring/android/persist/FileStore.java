@@ -54,7 +54,7 @@ public final class FileStore {
 	 * (getFilename() being static and abstract and defined in Data). Notice
 	 * also that {@code Map<Class<? extends Enum<?> & Fields<?, ?, ?>>, String>}
 	 * will fail to compile in a field declaration see <a
-	 * href="http://stackoverflow.com/a/6643378/281545">here</a>  TODO ask
+	 * href="http://stackoverflow.com/a/6643378/281545">here</a> TODO ask
 	 *
 	 * @return
 	 */
@@ -70,8 +70,8 @@ public final class FileStore {
 	// =========================================================================
 	private static final String NO_IMEI = "NO_IMEI";
 	/** ALWAYS access this via {@link #getRootFolder(Context)} */
-	private static File sRootFolder; // TODO : cache but can lead to NPEs - ask
-	// : enforce access to static fields via getter
+	private static volatile File sRootFolder; // TODO : cache but can lead to
+	// NPEs - ask : enforce access to static fields via getter
 
 	/**
 	 * Returns the root folder in internal storage where the data is kept. Will
@@ -89,10 +89,12 @@ public final class FileStore {
 	 */
 	private static synchronized File getRootFolder(Context ctx)
 			throws IOException {
-		if (sRootFolder == null) {
+		File result = sRootFolder;
+		if (result == null) {
 			synchronized (FileStore.class) {
-				String rootFoldername;
-				if (sRootFolder == null) {
+				result = sRootFolder;
+				if (result == null) {
+					String rootFoldername;
 					try {
 						rootFoldername = DeviceIdentifier.getDeviceIdentifier(
 							ctx, false);
@@ -100,11 +102,12 @@ public final class FileStore {
 						// w("No imei today : " + e);
 						rootFoldername = NO_IMEI;
 					}
-					sRootFolder = FileIO.createDirInternal(ctx, rootFoldername);
+					sRootFolder = result = FileIO.createDirInternal(ctx,
+						rootFoldername);
 				}
 			}
 		}
-		return sRootFolder;
+		return result;
 	}
 
 	/**
@@ -464,8 +467,9 @@ public final class FileStore {
 
 	/**
 	 * Meant to be used in the server so uses Lists internally instead of
-	 * arrays. Buffers the input stream so do not pass in a BufferedInputStream
-	 * (TODO ask - maybe not important)
+	 * arrays. Buffers the input stream so do not pass in a BufferedInputStream.
+	 * See <a href="http://stackoverflow.com/questions/19067244/">What is the
+	 * result of buffering a buffered stream in java?</a>
 	 *
 	 * @param <K>
 	 *

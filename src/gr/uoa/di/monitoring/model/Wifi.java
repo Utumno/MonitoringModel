@@ -11,7 +11,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.EnumMap;
 import java.util.List;
 
@@ -22,7 +21,6 @@ import android.net.wifi.ScanResult;
 
 public final class Wifi extends Data {
 
-	private long time;
 	private List<Network> networks = new ArrayList<Wifi.Network>();
 	private static final String FILE_PREFIX = "wifi";
 
@@ -36,10 +34,9 @@ public final class Wifi extends Data {
 
 			@Override
 			public List<byte[]> getData(List<ScanResult> scanRes) {
-				// NB : I just get the time of the method invocation - TODO time
 				List<byte[]> arrayList = new ArrayList<byte[]>();
-				arrayList.add(EncodingUtils.getAsciiBytes(System
-						.currentTimeMillis() + ""));
+				// NB : I just get the time of the method invocation
+				arrayList.add(currentTime());
 				return arrayList;
 			}
 
@@ -279,11 +276,11 @@ public final class Wifi extends Data {
 		}
 
 		public String getSsid() {
-			return new String(ssid);
+			return ssid;
 		}
 
 		public String getBssid() {
-			return new String(bssid);
+			return bssid;
 		}
 
 		public int getFrequency() {
@@ -310,21 +307,16 @@ public final class Wifi extends Data {
 
 	@Override
 	public String toString() {
-		// TODO move to data the time part
 		final StringBuilder sb = new StringBuilder();
 		for (Network net : networks) {
 			sb.append(net).append(N);
 		}
-		return "Time : " + new Date(time) + N + sb.toString();
+		return super.toString() + N + sb.toString();
 	}
 
 	// =========================================================================
 	// Accessors
 	// =========================================================================
-	public long getTime() {
-		return time;
-	}
-
 	public List<Network> getNetworks() {
 		return new ArrayList<Wifi.Network>(networks);
 	}

@@ -11,7 +11,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.EnumMap;
 import java.util.List;
 
@@ -27,14 +26,8 @@ public final class Battery extends Data {
 		super(imei);
 	}
 
-	private long time;
 	private String status;
 	private static final String FILE_PREFIX = "batt";
-
-	// TODO : delete me
-	public static String hallo() {
-		return "Hello server";
-	}
 
 	public static enum BatteryFields implements
 			Fields<Intent, Battery, List<Byte>> {
@@ -42,10 +35,9 @@ public final class Battery extends Data {
 
 			@Override
 			public List<byte[]> getData(Intent data) {
-				// TODO time()
 				List<byte[]> arrayList = new ArrayList<byte[]>();
-				arrayList.add(EncodingUtils.getAsciiBytes(System
-						.currentTimeMillis() + ""));
+				// NB : I just get the time of the method invocation
+				arrayList.add(currentTime());
 				return arrayList;
 			}
 
@@ -128,17 +120,13 @@ public final class Battery extends Data {
 
 	@Override
 	public String toString() {
-		return "Time : " + new Date(time) + N + "Status : " + status;
+		return super.toString() + N + "Status : " + status;
 	}
 
 	// =========================================================================
 	// Accessors
 	// =========================================================================
-	public long getTime() {
-		return time;
-	}
-
 	public String getStatus() {
-		return new String(status);
+		return status;
 	}
 }
