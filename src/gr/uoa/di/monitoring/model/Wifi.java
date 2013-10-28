@@ -2,8 +2,14 @@ package gr.uoa.di.monitoring.model;
 
 import static gr.uoa.di.java.helpers.Utils.listToLong;
 import static gr.uoa.di.java.helpers.Utils.listToString;
+
+import android.content.Context;
+import android.net.wifi.ScanResult;
+
 import gr.uoa.di.monitoring.android.persist.FileStore;
 import gr.uoa.di.monitoring.android.persist.FileStore.Fields;
+
+import org.apache.http.util.EncodingUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -13,11 +19,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
-
-import org.apache.http.util.EncodingUtils;
-
-import android.content.Context;
-import android.net.wifi.ScanResult;
 
 public final class Wifi extends Data {
 
@@ -117,7 +118,7 @@ public final class Wifi extends Data {
 						}
 						if (i < nets.size())
 							throw new ParserException(
-									"Malformed file : extra SSIDs with no BSSID");
+								"Malformed file : extra SSIDs with no BSSID");
 					}
 				} catch (NumberFormatException e) {
 					throw new ParserException("Malformed file", e);
@@ -125,7 +126,7 @@ public final class Wifi extends Data {
 					throw new ParserException("Malformed file : missing ", e);
 				} catch (IndexOutOfBoundsException e) {
 					throw new ParserException(
-							"Malformed file : extra BSSIDs with no SSID", e);
+						"Malformed file : extra BSSIDs with no SSID", e);
 				}
 				return wi;
 			}
@@ -158,8 +159,8 @@ public final class Wifi extends Data {
 						}
 						if (i < nets.size())
 							throw new ParserException(
-									"Malformed file : extra SSIDs with no "
-										+ "frequencies");
+								"Malformed file : extra SSIDs with no "
+									+ "frequencies");
 					}
 				} catch (NumberFormatException e) {
 					throw new ParserException("Malformed file", e);
@@ -167,8 +168,8 @@ public final class Wifi extends Data {
 					throw new ParserException("Malformed file", e);
 				} catch (IndexOutOfBoundsException e) {
 					throw new ParserException(
-							"Malformed file : extra frequencies with no "
-								+ "frequencies", e);
+						"Malformed file : extra frequencies with no "
+							+ "frequencies", e);
 				}
 				return wi;
 			}
@@ -201,8 +202,7 @@ public final class Wifi extends Data {
 						}
 						if (i < nets.size())
 							throw new ParserException(
-									"Malformed file : extra SSIDs with no "
-										+ "level");
+								"Malformed file : extra SSIDs with no level");
 					}
 				} catch (NumberFormatException e) {
 					throw new ParserException("Malformed file", e);
@@ -210,7 +210,7 @@ public final class Wifi extends Data {
 					throw new ParserException("Malformed file", e);
 				} catch (IndexOutOfBoundsException e) {
 					throw new ParserException(
-							"Malformed file : extra level with no SSIDs", e);
+						"Malformed file : extra level with no SSIDs", e);
 				}
 				return wi;
 			}
@@ -237,7 +237,8 @@ public final class Wifi extends Data {
 
 		public static List<List<byte[]>> createListOfListsOfByteArrays(
 				List<ScanResult> data) {
-			final List<List<byte[]>> listofListsOfByteArrays = new ArrayList<List<byte[]>>();
+			final List<List<byte[]>> listofListsOfByteArrays = new
+					ArrayList<List<byte[]>>();
 			for (WifiFields bs : WifiFields.values()) {
 				if (bs.isList()) listofListsOfByteArrays.add(bs.getData(data));
 			}
@@ -250,7 +251,7 @@ public final class Wifi extends Data {
 			ParserException {
 		final FileInputStream fis = new FileInputStream(f);
 		List<EnumMap<WifiFields, List<List<Byte>>>> entries = FileStore
-				.getEntries(fis, WifiFields.class);
+			.getEntries(fis, WifiFields.class);
 		final List<Wifi> data = new ArrayList<Wifi>();
 		for (EnumMap<WifiFields, List<List<Byte>>> enumMap : entries) {
 			Wifi bat = new Wifi(imei);

@@ -3,8 +3,14 @@ package gr.uoa.di.monitoring.model;
 import static gr.uoa.di.java.helpers.Utils.listToDouble;
 import static gr.uoa.di.java.helpers.Utils.listToLong;
 import static gr.uoa.di.java.helpers.Utils.listToString;
+
+import android.content.Context;
+import android.location.Location;
+
 import gr.uoa.di.monitoring.android.persist.FileStore;
 import gr.uoa.di.monitoring.android.persist.FileStore.Fields;
+
+import org.apache.http.util.EncodingUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -14,11 +20,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
-
-import org.apache.http.util.EncodingUtils;
-
-import android.content.Context;
-import android.location.Location;
 
 public final class Position extends Data {
 
@@ -150,7 +151,7 @@ public final class Position extends Data {
 			ParserException {
 		final FileInputStream fis = new FileInputStream(f);
 		List<EnumMap<LocationFields, List<Byte>>> entries = FileStore
-				.getEntries(fis, LocationFields.class);
+			.getEntries(fis, LocationFields.class);
 		final List<Position> data = new ArrayList<Position>();
 		for (EnumMap<LocationFields, List<Byte>> enumMap : entries) {
 			Position bat = new Position(imei);
@@ -169,10 +170,9 @@ public final class Position extends Data {
 
 	@Override
 	public String toString() {
-		return super.toString() + N + "Longitude : " + longitude
-			+ N + "Latitude : " + latitude + N + "Provider : " + provider;
+		return super.toString() + N + "Longitude : " + longitude + N
+			+ "Latitude : " + latitude + N + "Provider : " + provider;
 	}
-
 
 	// =========================================================================
 	// Accessors

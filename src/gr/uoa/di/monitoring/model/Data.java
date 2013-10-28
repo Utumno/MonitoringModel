@@ -1,8 +1,8 @@
 package gr.uoa.di.monitoring.model;
 
-import java.util.Date;
-
 import org.apache.http.util.EncodingUtils;
+
+import java.util.Date;
 
 public abstract class Data {
 
@@ -35,7 +35,6 @@ public abstract class Data {
 	 * @return a byte[] with current time
 	 */
 	static byte[] currentTime() {
-
 		return EncodingUtils.getAsciiBytes(System.currentTimeMillis() + "");
 	}
 

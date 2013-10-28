@@ -1,5 +1,7 @@
 package gr.uoa.di.monitoring.android.persist;
 
+import android.content.Context; // TODO : .... coupling
+
 import gr.uoa.di.android.helpers.DeviceIdentifier;
 import gr.uoa.di.android.helpers.DeviceIdentifier.DeviceIDException;
 import gr.uoa.di.android.helpers.FileIO;
@@ -27,8 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import android.content.Context; // TODO : .... coupling
-
 public final class FileStore {
 
 	private static final String FILENAME_SEPA = "_";
@@ -47,7 +47,6 @@ public final class FileStore {
 	 */
 	public static final String FILES_ENCODING = Utils.UTF8;
 	public static final Object FILE_STORE_LOCK = new Object();
-
 	/**
 	 * Data Class + filename - would be great if overriding of static methods
 	 * were permitted plus one could access them as Battery.getFilename()
@@ -437,7 +436,7 @@ public final class FileStore {
 			String rootPath, String imei) throws ParserException {
 		Map<Class<? extends Data>, List<T>> lol = new HashMap<Class<? extends Data>, List<T>>();
 		for (Entry<Class<? extends Data>, String> entry : DATA_CLASSES
-				.entrySet()) {
+			.entrySet()) {
 			final File file = new File(rootPath, entry.getValue());
 			final Class<? extends Data> dataCls = entry.getKey();
 			Method pars = null;
@@ -485,7 +484,7 @@ public final class FileStore {
 	public static <D, T extends Enum<T> & Fields<?, ?, D>> List<EnumMap<T, D>> getEntries(
 			InputStream is, Class<T> fields) throws IOException {
 		BufferedInputStream bis = new BufferedInputStream(is,
-				INPUT_STREAM_BUFFER_SIZE);
+			INPUT_STREAM_BUFFER_SIZE);
 		final List<List<Byte>> entries = new ArrayList<List<Byte>>();
 		{
 			// get the entries

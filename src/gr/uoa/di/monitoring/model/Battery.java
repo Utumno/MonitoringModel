@@ -2,8 +2,15 @@ package gr.uoa.di.monitoring.model;
 
 import static gr.uoa.di.java.helpers.Utils.listToLong;
 import static gr.uoa.di.java.helpers.Utils.listToString;
+
+import android.content.Context;
+import android.content.Intent;
+import android.os.BatteryManager;
+
 import gr.uoa.di.monitoring.android.persist.FileStore;
 import gr.uoa.di.monitoring.android.persist.FileStore.Fields;
+
+import org.apache.http.util.EncodingUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -13,12 +20,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
-
-import org.apache.http.util.EncodingUtils;
-
-import android.content.Context;
-import android.content.Intent;
-import android.os.BatteryManager;
 
 public final class Battery extends Data {
 
@@ -60,7 +61,7 @@ public final class Battery extends Data {
 			public List<byte[]> getData(Intent batteryStatus) {
 				List<byte[]> arrayList = new ArrayList<byte[]>();
 				arrayList.add(EncodingUtils.getAsciiBytes(batteryStatus
-						.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) + ""));
+					.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) + ""));
 				return arrayList;
 			}
 
@@ -95,7 +96,7 @@ public final class Battery extends Data {
 			ParserException {
 		final FileInputStream fis = new FileInputStream(f);
 		List<EnumMap<BatteryFields, List<Byte>>> entries = FileStore
-				.getEntries(fis, BatteryFields.class);
+			.getEntries(fis, BatteryFields.class);
 		final List<Battery> data = new ArrayList<Battery>();
 		for (EnumMap<BatteryFields, List<Byte>> enumMap : entries) {
 			Battery bat = new Battery(imei);
