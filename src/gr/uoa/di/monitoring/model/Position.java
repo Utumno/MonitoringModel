@@ -144,8 +144,17 @@ public final class Position extends Data {
 	public static List<Position> parse(File f, String imei) throws IOException,
 			ParserException {
 		final FileInputStream fis = new FileInputStream(f);
-		List<EnumMap<LocationFields, List<Byte>>> entries = FileStore
-			.getEntries(fis, LocationFields.class);
+		List<EnumMap<LocationFields, List<Byte>>> entries;
+		try {
+			entries = FileStore.getEntries(fis, LocationFields.class);
+		} finally {
+			try {
+				fis.close();
+			} catch (IOException e) {
+				// could not close the file ?
+				e.printStackTrace();
+			}
+		}
 		final List<Position> data = new ArrayList<Position>();
 		for (EnumMap<LocationFields, List<Byte>> enumMap : entries) {
 			Position bat = new Position(imei);

@@ -93,8 +93,17 @@ public final class Battery extends Data {
 	public static List<Battery> parse(File f, String imei) throws IOException,
 			ParserException {
 		final FileInputStream fis = new FileInputStream(f);
-		List<EnumMap<BatteryFields, List<Byte>>> entries = FileStore
-			.getEntries(fis, BatteryFields.class);
+		List<EnumMap<BatteryFields, List<Byte>>> entries;
+		try {
+			entries = FileStore.getEntries(fis, BatteryFields.class);
+		} finally {
+			try {
+				fis.close();
+			} catch (IOException e) {
+				// could not close the file ?
+				e.printStackTrace();
+			}
+		}
 		final List<Battery> data = new ArrayList<Battery>();
 		for (EnumMap<BatteryFields, List<Byte>> enumMap : entries) {
 			Battery bat = new Battery(imei);

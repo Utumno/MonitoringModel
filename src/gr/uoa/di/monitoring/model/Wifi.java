@@ -244,8 +244,18 @@ public final class Wifi extends Data {
 	public static List<Wifi> parse(File f, String imei) throws IOException,
 			ParserException {
 		final FileInputStream fis = new FileInputStream(f);
-		List<EnumMap<WifiFields, List<List<Byte>>>> entries = FileStore
-			.getEntries(fis, WifiFields.class);
+		List<EnumMap<WifiFields, List<List<Byte>>>> entries;
+		try {
+			entries = FileStore
+				.getEntries(fis, WifiFields.class);
+		} finally {
+			try {
+				fis.close();
+			} catch (IOException e) {
+				// could not close the file ?
+				e.printStackTrace();
+			}
+		}
 		final List<Wifi> data = new ArrayList<Wifi>();
 		for (EnumMap<WifiFields, List<List<Byte>>> enumMap : entries) {
 			Wifi bat = new Wifi(imei);
