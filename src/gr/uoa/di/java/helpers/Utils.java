@@ -1,7 +1,12 @@
 package gr.uoa.di.java.helpers;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,46 +38,84 @@ public final class Utils {
 	 */
 	public static final String UTF16 = "UTF-16";
 
+	/**
+	 * Returns the String that the given List of Bytes represents in the given
+	 * charset. If an empty list is given the empty string is returned
+	 * immediately. Otherwise the Bytes are decoded using the charset specified
+	 * by its name. Note that if the Bytes given are not valid in the given
+	 * charset the behavior of this method is unspecified (due to the
+	 * unspecified behavior of the {@link String#String(byte[], String)}
+	 * constructor).
+	 *
+	 * @param lb
+	 *            a list of Bytes
+	 * @param charsetName
+	 *            the charset name those bytes will be decoded with
+	 * @return a sting constructed from the bytes in lb
+	 * @throws UnsupportedEncodingException
+	 *             if the charset given is unsupported (except if an empty list
+	 *             is given where the charset is not used)
+	 * @throws NullPointerException
+	 *             if lb is null
+	 */
 	public static String listToString(List<Byte> lb, String charsetName)
-			throws UnsupportedEncodingException, NumberFormatException {
+			throws UnsupportedEncodingException {
 		// see http://stackoverflow.com/questions/1096868/
-		// TODO better tests
 		if (lb == null)
 			throw new NullPointerException("List<Byte> can't be null");
-		byte[] array = new byte[lb.size()];
+		if (lb.isEmpty()) return "";
+		final byte[] array = new byte[lb.size()];
 		{
 			int i = 0;
 			for (byte current : lb) {
-				array[i] = current;
-				++i;
+				array[i++] = current;
 			}
 		}
-		return new String(array, charsetName);
+		return new String(array, charsetName); // The behavior of this
+		// constructor when the given bytes are not valid in the given charset
+		// is unspecified -- !!!!
 	}
 
-	public static long listToLong(List<Byte> lb)
-			throws UnsupportedEncodingException, NumberFormatException {
+	public static long listToLong(List<Byte> lb) throws NumberFormatException {
 		// TODO better tests
 		if (lb == null)
 			throw new NullPointerException("List<Byte> can't be null");
-		return new BigDecimal(listToString(lb, ASCII)).longValue();
+		try {
+			return new BigInteger(listToString(lb, ASCII)).longValue();
+		} catch (UnsupportedEncodingException e) {
+			throw new AssertionError(e); // "ASCII unsupported"
+		}
 	}
 
 	/**
-	 * If list is empty 0 is returned. If List is null is thrown
+	 * If list is empty 0 is returned. If lb is null NullPointerException is
+	 * thrown. Otherwise lb must contain the ASCII representation of the digits
+	 * of a double number and possibly an exponent or a decimal part etc. If
+	 * other characters are contained a {@link NumberFormatException} is thrown.
+	 * If characters outside the ASCII range are contained the
+	 * {@link String#String(byte[], String)} constructor used internally will
+	 * result in unspecified behavior which in turn will lead to a
+	 * NumberFormatException (probably).
 	 *
 	 * @param lb
+	 *            the list of bytes that represent the characters representing a
+	 *            double
 	 * @return
-	 * @throws UnsupportedEncodingException
+	 * @throws NumberFormatException
+	 *             if the bytes in lb are converted to a string that can't be
+	 *             converted to a double
 	 * @throws NullPointerException
-	 *             if ld is null
+	 *             if lb is null
 	 */
 	public static double listToDouble(List<Byte> lb)
-			throws UnsupportedEncodingException, NumberFormatException {
-		// TODO better tests
+			throws NumberFormatException {
 		if (lb == null)
 			throw new NullPointerException("List<Byte> can't be null");
-		return new BigDecimal(listToString(lb, ASCII)).doubleValue();
+		try {
+			return new BigDecimal(listToString(lb, ASCII)).doubleValue();
+		} catch (UnsupportedEncodingException e) {
+			throw new AssertionError(e); // "ASCII unsupported"
+		}
 	}
 
 	public static List<Byte> listFromArray(byte[] ba) {
@@ -83,10 +126,47 @@ public final class Utils {
 		}
 		return lb;
 	}
+
 	// public static <T> T[] concat(T[] first, T[] second) {
 	// T[] result = Arrays.copyOf(first, first.length + second.length); // NOT
 	// // fucki9ng available
 	// System.arraycopy(second, 0, result, first.length, second.length);
 	// return result;
 	// }
+	/**
+	 * Load UTF8withBOM or any ansi text file. It drops the BOM from UTF8 files
+	 * if present
+	 *
+	 * @param filename
+	 * @return
+	 * @throws IOException
+	 */
+	@SuppressWarnings("unused")
+	private static String loadFileAsString(String filename, String charsetName)
+			throws IOException {
+		final int BUFLEN = 1024;
+		BufferedInputStream is = new BufferedInputStream(new FileInputStream(
+			filename), BUFLEN);
+		try {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream(BUFLEN);
+			byte[] bytes = new byte[BUFLEN];
+			boolean isUTF8 = false;
+			for (int read, count = 0; (read = is.read(bytes)) != -1;) {
+				if (count == 0 && bytes[0] == (byte) 0xEF
+					&& bytes[1] == (byte) 0xBB && bytes[2] == (byte) 0xBF) {
+					isUTF8 = true;
+					baos.write(bytes, 3, read - 3); // drop UTF8 bom marker
+				} else {
+					baos.write(bytes, 0, read);
+				}
+				count += read;
+			}
+			return isUTF8 ? new String(baos.toByteArray(), "UTF-8")
+					: new String(baos.toByteArray(), charsetName);
+		} finally {
+			try {
+				is.close();
+			} catch (IOException ex) {}
+		}
+	}
 }

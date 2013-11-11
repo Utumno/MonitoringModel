@@ -49,8 +49,6 @@ public final class Battery extends Data {
 					bat.time = listToLong(list);
 				} catch (NumberFormatException e) {
 					throw new ParserException("Malformed file", e);
-				} catch (UnsupportedEncodingException e) {
-					throw new ParserException("Malformed file", e);
 				}
 				return bat;
 			}

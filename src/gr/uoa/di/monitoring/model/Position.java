@@ -50,8 +50,6 @@ public final class Position extends Data {
 					pos.time = listToLong(list);
 				} catch (NumberFormatException e) {
 					throw new ParserException("Malformed file", e);
-				} catch (UnsupportedEncodingException e) {
-					throw new ParserException("Malformed file", e);
 				}
 				return pos;
 			}
@@ -73,8 +71,6 @@ public final class Position extends Data {
 					pos.latitude = listToDouble(list);
 				} catch (NumberFormatException e) {
 					throw new ParserException("Malformed file", e);
-				} catch (UnsupportedEncodingException e) {
-					throw new ParserException("Malformed file", e);
 				}
 				return pos;
 			}
@@ -95,8 +91,6 @@ public final class Position extends Data {
 				try {
 					pos.longitude = listToDouble(list);
 				} catch (NumberFormatException e) {
-					throw new ParserException("Malformed file", e);
-				} catch (UnsupportedEncodingException e) {
 					throw new ParserException("Malformed file", e);
 				}
 				return pos;

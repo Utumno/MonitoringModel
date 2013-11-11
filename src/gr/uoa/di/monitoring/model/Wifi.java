@@ -50,8 +50,6 @@ public final class Wifi extends Data {
 					wi.time = listToLong(list.get(0));
 				} catch (NumberFormatException e) {
 					throw new ParserException("Malformed file", e);
-				} catch (UnsupportedEncodingException e) {
-					throw new ParserException("Malformed file", e);
 				}
 				return wi;
 			}
@@ -164,8 +162,6 @@ public final class Wifi extends Data {
 					}
 				} catch (NumberFormatException e) {
 					throw new ParserException("Malformed file", e);
-				} catch (UnsupportedEncodingException e) {
-					throw new ParserException("Malformed file", e);
 				} catch (IndexOutOfBoundsException e) {
 					throw new ParserException(
 						"Malformed file : extra frequencies with no "
@@ -205,8 +201,6 @@ public final class Wifi extends Data {
 								"Malformed file : extra SSIDs with no level");
 					}
 				} catch (NumberFormatException e) {
-					throw new ParserException("Malformed file", e);
-				} catch (UnsupportedEncodingException e) {
 					throw new ParserException("Malformed file", e);
 				} catch (IndexOutOfBoundsException e) {
 					throw new ParserException(
