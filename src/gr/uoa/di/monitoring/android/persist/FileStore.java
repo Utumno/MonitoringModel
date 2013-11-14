@@ -1,12 +1,19 @@
 package gr.uoa.di.monitoring.android.persist;
 
-import android.content.Context; // TODO : .... coupling
+import android.content.Context;
 
+// TODO : coupling -> imports below (android import above can't be helped)
+// couple monitoring model to android.helpers and thus DataServlet to
+// android.helpers !!!
+// if I delete the androidhelpers.jar from the servlet I get :
+// java.lang.ClassNotFoundException:
+// gr.uoa.di.android.helpers.DeviceIdentifier$DeviceIDException !!!!!
+// I must move those to inner static classes which won't be loaded hopefully !
 import gr.uoa.di.android.helpers.DeviceIdentifier;
 import gr.uoa.di.android.helpers.DeviceIdentifier.DeviceIDException;
 import gr.uoa.di.android.helpers.FileIO;
-import gr.uoa.di.android.helpers.Zip.CompressException;
 import gr.uoa.di.java.helpers.Utils;
+import gr.uoa.di.java.helpers.Zip.CompressException;
 import gr.uoa.di.monitoring.model.Battery;
 import gr.uoa.di.monitoring.model.Data;
 import gr.uoa.di.monitoring.model.ParserException;
@@ -54,16 +61,14 @@ public final class FileStore {
 	 * also that {@code Map<Class<? extends Enum<?> & Fields<?, ?, ?>>, String>}
 	 * will fail to compile in a field declaration see <a
 	 * href="http://stackoverflow.com/a/6643378/281545">here</a> TODO ask
-	 *
-	 * @return
 	 */
-	private final static Map<Class<? extends Data>, String> DATA_CLASSES = new HashMap<Class<? extends Data>, String>();
+	private final static Map<Class<? extends Data>, String> DATA_CLASSES =
+			new HashMap<Class<? extends Data>, String>();
 	static {
 		DATA_CLASSES.put(Battery.class, new Battery("").getFilename());
 		DATA_CLASSES.put(Position.class, new Position("").getFilename());
 		DATA_CLASSES.put(Wifi.class, new Wifi("").getFilename());
 	}
-
 	// =========================================================================
 	// Persistence
 	// =========================================================================
@@ -297,8 +302,8 @@ public final class FileStore {
 		try {
 			final String rootPath = getRootFolder(ctx).getAbsolutePath();
 			final String destination = filename(rootPath);
-			return gr.uoa.di.android.helpers.Zip.zipFolder(rootPath,
-				destination).getFile();
+			return gr.uoa.di.java.helpers.Zip.zipFolder(rootPath, destination)
+				.getFile();
 			// final String backFilename = System.currentTimeMillis() + ".zip";
 			// FileIO.copyFileFromInternalToExternalStorage(destination,
 			// LOG_DIR, backFilename);
@@ -434,7 +439,8 @@ public final class FileStore {
 	// =========================================================================
 	public static <T extends Data> Map<Class<? extends Data>, List<T>> parse(
 			String rootPath, String imei) throws ParserException {
-		Map<Class<? extends Data>, List<T>> lol = new HashMap<Class<? extends Data>, List<T>>();
+		Map<Class<? extends Data>, List<T>> lol =
+				new HashMap<Class<? extends Data>, List<T>>();
 		for (Entry<Class<? extends Data>, String> entry : DATA_CLASSES
 			.entrySet()) {
 			final File file = new File(rootPath, entry.getValue());
@@ -481,8 +487,8 @@ public final class FileStore {
 	 *         bytes for fields where isList() returns true
 	 * @throws IOException
 	 */
-	public static <D, T extends Enum<T> & Fields<?, ?, D>> List<EnumMap<T, D>> getEntries(
-			InputStream is, Class<T> fields) throws IOException {
+	public static <D, T extends Enum<T> & Fields<?, ?, D>> List<EnumMap<T, D>>
+			getEntries(InputStream is, Class<T> fields) throws IOException {
 		BufferedInputStream bis = new BufferedInputStream(is,
 			INPUT_STREAM_BUFFER_SIZE);
 		final List<List<Byte>> entries = new ArrayList<List<Byte>>();
