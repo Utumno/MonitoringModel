@@ -25,7 +25,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -329,63 +328,6 @@ public final class FileStore {
 		for (byte[] array : listByteArrays) {
 			result = appendArrayToByteArray(array, delimiter, result);
 		}
-		return result;
-	}
-
-	// =========================================================================
-	// String versions // FIXME locks or maybe delete them altogether
-	// =========================================================================
-	public static void persist(File file, String encodingName,
-			List<String> listString) throws FileNotFoundException,
-			UnsupportedEncodingException, IOException {
-		byte[] result = listOfStringsToByteArray(listString, encodingName,
-			DELIMITER, new byte[0]);
-		result[result.length - 1] = NEWLINE;
-		FileIO.append(file, result);
-	}
-
-	public static <T extends Enum<T> & Fields<?, ?, ?>> void persist(
-			final File file, final Class<T> fields, final String encodingName,
-			final List<String> data, final List<String>... listsOfData)
-			throws FileNotFoundException, UnsupportedEncodingException,
-			IOException {
-		byte[] result = new byte[0];
-		int nextString = 0;
-		int nextList = 0;
-		for (T field : fields.getEnumConstants()) {
-			if (field.isList()) {
-				result = listOfStringsToByteArray(listsOfData[nextList++],
-					encodingName, ARRAY_DELIMITER, result);
-				result[result.length - 1] = DELIMITER;
-			} else {
-				result = appendStringToByteArray(data.get(nextString++),
-					encodingName, DELIMITER, result);
-			}
-		}
-		result[result.length - 1] = NEWLINE;
-		FileIO.append(file, result);
-	}
-
-	// helpers
-	private static byte[] listOfStringsToByteArray(final List<String> data,
-			final String encodingName, final byte delimiter, byte[] result)
-			throws UnsupportedEncodingException {
-		for (String string : data) {
-			result = appendStringToByteArray(string, encodingName, delimiter,
-				result);
-		}
-		return result;
-	}
-
-	private static byte[] appendStringToByteArray(final String string,
-			final String encodingName, final byte delimiter, byte[] result)
-			throws UnsupportedEncodingException {
-		final byte[] second = string.getBytes(encodingName);
-		final byte[] first = result.clone();
-		result = new byte[first.length + second.length + 1];
-		System.arraycopy(first, 0, result, 0, first.length);
-		System.arraycopy(second, 0, result, first.length, second.length);
-		result[result.length - 1] = delimiter;
 		return result;
 	}
 
