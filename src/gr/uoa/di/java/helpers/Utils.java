@@ -1,9 +1,5 @@
 package gr.uoa.di.java.helpers;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -76,8 +72,29 @@ public final class Utils {
 		// is unspecified -- !!!!
 	}
 
+	/**
+	 * Returns a long whose ASCII representation are the bytes in the given
+	 * list. If lb is null NullPointerException is thrown. If lb is empty
+	 * NumberFormatException is thrown. Otherwise lb must contain the ASCII
+	 * representation of the digits of a long number. If other characters are
+	 * contained a {@link NumberFormatException} is thrown. If characters
+	 * outside the ASCII range are contained the
+	 * {@link String#String(byte[], String)} constructor used internally will
+	 * result in unspecified behavior which in turn will lead to a
+	 * NumberFormatException (hopefully). Careful - the l/L long suffix must not
+	 * be included in the bytes - will result in NumberFormatException
+	 *
+	 * @param lb
+	 *            the list of bytes that represent the characters representing a
+	 *            double
+	 * @return
+	 * @throws NumberFormatException
+	 *             if the bytes in lb are converted to a string that can't be
+	 *             converted to a double
+	 * @throws NullPointerException
+	 *             if lb is null
+	 */
 	public static long listToLong(List<Byte> lb) throws NumberFormatException {
-		// TODO better tests
 		if (lb == null)
 			throw new NullPointerException("List<Byte> can't be null");
 		try {
@@ -88,14 +105,17 @@ public final class Utils {
 	}
 
 	/**
-	 * If list is empty 0 is returned. If lb is null NullPointerException is
-	 * thrown. Otherwise lb must contain the ASCII representation of the digits
-	 * of a double number and possibly an exponent or a decimal part etc. If
-	 * other characters are contained a {@link NumberFormatException} is thrown.
-	 * If characters outside the ASCII range are contained the
-	 * {@link String#String(byte[], String)} constructor used internally will
-	 * result in unspecified behavior which in turn will lead to a
-	 * NumberFormatException (probably).
+	 * Returns a double whose ASCII representation are the bytes in the given
+	 * list. If lb is null NullPointerException is thrown. If lb is empty
+	 * NumberFormatException is thrown. Otherwise lb must contain the ASCII
+	 * representation of the digits of a double number and possibly an exponent
+	 * or a decimal part etc. If other characters are contained a
+	 * {@link NumberFormatException} is thrown. If characters outside the ASCII
+	 * range are contained the {@link String#String(byte[], String)} constructor
+	 * used internally will result in unspecified behavior which in turn will
+	 * lead to a NumberFormatException (hopefully). Careful - the d/D double
+	 * suffix must not be included in the bytes - will result in
+	 * NumberFormatException
 	 *
 	 * @param lb
 	 *            the list of bytes that represent the characters representing a
@@ -125,48 +145,5 @@ public final class Utils {
 			lb.add(b);
 		}
 		return lb;
-	}
-
-	// public static <T> T[] concat(T[] first, T[] second) {
-	// T[] result = Arrays.copyOf(first, first.length + second.length); // NOT
-	// // fucki9ng available
-	// System.arraycopy(second, 0, result, first.length, second.length);
-	// return result;
-	// }
-	/**
-	 * Load UTF8withBOM or any ansi text file. It drops the BOM from UTF8 files
-	 * if present
-	 *
-	 * @param filename
-	 * @return
-	 * @throws IOException
-	 */
-	@SuppressWarnings("unused")
-	private static String loadFileAsString(String filename, String charsetName)
-			throws IOException {
-		final int BUFLEN = 1024;
-		BufferedInputStream is = new BufferedInputStream(new FileInputStream(
-			filename), BUFLEN);
-		try {
-			ByteArrayOutputStream baos = new ByteArrayOutputStream(BUFLEN);
-			byte[] bytes = new byte[BUFLEN];
-			boolean isUTF8 = false;
-			for (int read, count = 0; (read = is.read(bytes)) != -1;) {
-				if (count == 0 && bytes[0] == (byte) 0xEF
-					&& bytes[1] == (byte) 0xBB && bytes[2] == (byte) 0xBF) {
-					isUTF8 = true;
-					baos.write(bytes, 3, read - 3); // drop UTF8 bom marker
-				} else {
-					baos.write(bytes, 0, read);
-				}
-				count += read;
-			}
-			return isUTF8 ? new String(baos.toByteArray(), "UTF-8")
-					: new String(baos.toByteArray(), charsetName);
-		} finally {
-			try {
-				is.close();
-			} catch (IOException ex) {}
-		}
 	}
 }

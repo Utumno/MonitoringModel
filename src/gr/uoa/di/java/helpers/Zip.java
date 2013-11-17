@@ -14,12 +14,11 @@ public final class Zip {
 	public static ZipFile zipFolderLocked(final String dirToZip,
 			final String destination, Object lock) throws CompressException {
 		// http://stackoverflow.com/questions/13395218/android-compressing-folder
-		// TODO parameters etc
 		try {
 			ZipFile zipfile = new ZipFile(destination);
 			ZipParameters parameters = new ZipParameters();
 			parameters.setCompressionMethod(Zip4jConstants.COMP_DEFLATE);
-			parameters.setCompressionLevel(Zip4jConstants.DEFLATE_LEVEL_NORMAL);
+			parameters.setCompressionLevel(Zip4jConstants.DEFLATE_LEVEL_ULTRA);
 			synchronized (lock) {
 				zipfile.addFolder(dirToZip, parameters);
 			}
@@ -32,12 +31,11 @@ public final class Zip {
 	public static ZipFile zipFolder(final String dirToZip,
 			final String destination) throws CompressException {
 		// http://stackoverflow.com/questions/13395218/android-compressing-folder
-		// TODO parameters etc
 		try {
 			ZipFile zipfile = new ZipFile(destination);
 			ZipParameters parameters = new ZipParameters();
 			parameters.setCompressionMethod(Zip4jConstants.COMP_DEFLATE);
-			parameters.setCompressionLevel(Zip4jConstants.DEFLATE_LEVEL_NORMAL);
+			parameters.setCompressionLevel(Zip4jConstants.DEFLATE_LEVEL_ULTRA);
 			zipfile.addFolder(dirToZip, parameters);
 			return zipfile;
 		} catch (ZipException e) {
