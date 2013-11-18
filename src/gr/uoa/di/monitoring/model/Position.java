@@ -1,15 +1,11 @@
 package gr.uoa.di.monitoring.model;
 
-import static gr.uoa.di.java.helpers.Utils.listFromArray;
-import static gr.uoa.di.java.helpers.Utils.listToDouble;
-import static gr.uoa.di.java.helpers.Utils.listToLong;
-import static gr.uoa.di.java.helpers.Utils.listToString;
-
 import android.content.Context;
 import android.location.Location;
 
 import gr.uoa.di.monitoring.android.persist.FileStore;
 import gr.uoa.di.monitoring.android.persist.FileStore.Fields;
+import gr.uoa.di.monitoring.android.persist.Persist;
 
 import org.apache.http.util.EncodingUtils;
 
@@ -21,6 +17,11 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
+
+import static gr.uoa.di.java.helpers.Utils.listFromArray;
+import static gr.uoa.di.java.helpers.Utils.listToDouble;
+import static gr.uoa.di.java.helpers.Utils.listToLong;
+import static gr.uoa.di.java.helpers.Utils.listToString;
 
 public final class Position extends Data {
 
@@ -138,7 +139,7 @@ public final class Position extends Data {
 	public static <T extends Enum<T> & Fields<?, ?, ?>> void saveData(
 			Context ctx, List<byte[]> listByteArrays)
 			throws FileNotFoundException, IOException {
-		FileStore.saveData(ctx, FILE_PREFIX, listByteArrays);
+		Persist.saveData(ctx, FILE_PREFIX, listByteArrays);
 	}
 
 	// TODO move this into base class Data and make it abstract
