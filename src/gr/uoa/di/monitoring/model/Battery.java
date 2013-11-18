@@ -1,5 +1,6 @@
 package gr.uoa.di.monitoring.model;
 
+import static gr.uoa.di.java.helpers.Utils.listFromArray;
 import static gr.uoa.di.java.helpers.Utils.listToLong;
 import static gr.uoa.di.java.helpers.Utils.listToString;
 
@@ -129,6 +130,15 @@ public final class Battery extends Data {
 	@Override
 	public String toString() {
 		return super.toString() + N + "Status : " + status;
+	}
+
+	public static Battery fromBytes(List<byte[]> lb) throws ParserException {
+		Battery battery = new Battery("");
+		int i = 0;
+		for (BatteryFields bf : BatteryFields.values()) {
+			bf.parse(listFromArray(lb.get(i++)), battery);
+		}
+		return battery;
 	}
 
 	// =========================================================================

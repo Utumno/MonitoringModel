@@ -1,5 +1,6 @@
 package gr.uoa.di.monitoring.model;
 
+import static gr.uoa.di.java.helpers.Utils.listFromArray;
 import static gr.uoa.di.java.helpers.Utils.listToLong;
 import static gr.uoa.di.java.helpers.Utils.listToString;
 
@@ -31,6 +32,12 @@ public final class Wifi extends Data {
 
 	public static enum WifiFields implements
 			FileStore.Fields<List<ScanResult>, Wifi, List<List<Byte>>> {
+		/*
+		 * getData takes a List<ScanResult> and produces a List<byte[]>. For
+		 * TIME the List<byte[]> gas a single element byte[] - the time in
+		 * bytes. For the rest of Fields those are lists of byte[] and each
+		 * byte[] is the respective network property for each network
+		 */
 		TIME(false) {
 
 			@Override
@@ -221,7 +228,17 @@ public final class Wifi extends Data {
 			return isList;
 		}
 
-		public static List<byte[]> createListOfByteArrays(List<ScanResult> data) {
+		/**
+		 * This extracts from data the *only* the non list fields (currently
+		 * TIME). TODO : unify with createListOfListsOfByteArrays
+		 *
+		 * @param data
+		 *            the list of ScanResult
+		 * @return a List<byte[]> which is essentially a one element list
+		 *         containing the time as a byte[]
+		 */
+		public static List<byte[]>
+				createListOfByteArrays(List<ScanResult> data) {
 			final List<byte[]> listByteArrays = new ArrayList<byte[]>();
 			for (WifiFields bs : WifiFields.values()) {
 				if (!bs.isList()) listByteArrays.add(bs.getData(data).get(0));
@@ -229,10 +246,19 @@ public final class Wifi extends Data {
 			return listByteArrays;
 		}
 
+		/**
+		 * This extracts from data *only* the *list* fields (the properties of
+		 * *each* network).
+		 *
+		 * @param data
+		 *            the list of ScanResult
+		 * @return a List<List<byte[]>> which is has as many elements as the
+		 *         list Fields each of which has as many elements as the
+		 *         networks scanned
+		 */
 		public static List<List<byte[]>> createListOfListsOfByteArrays(
 				List<ScanResult> data) {
-			final List<List<byte[]>> listofListsOfByteArrays = new
-					ArrayList<List<byte[]>>();
+			final List<List<byte[]>> listofListsOfByteArrays = new ArrayList<List<byte[]>>();
 			for (WifiFields bs : WifiFields.values()) {
 				if (bs.isList()) listofListsOfByteArrays.add(bs.getData(data));
 			}
@@ -246,8 +272,7 @@ public final class Wifi extends Data {
 		final FileInputStream fis = new FileInputStream(f);
 		List<EnumMap<WifiFields, List<List<Byte>>>> entries;
 		try {
-			entries = FileStore
-				.getEntries(fis, WifiFields.class);
+			entries = FileStore.getEntries(fis, WifiFields.class);
 		} finally {
 			try {
 				fis.close();
@@ -317,6 +342,28 @@ public final class Wifi extends Data {
 			sb.append(net).append(N);
 		}
 		return super.toString() + N + sb.toString();
+	}
+
+	public static Wifi fromBytes(List<byte[]> lb, List<List<byte[]>> llb)
+			throws ParserException {
+		Wifi wifi = new Wifi("");
+		int nextArray = 0;
+		int nextListOfArrays = 0;
+		for (WifiFields bf : WifiFields.values()) {
+			if (!bf.isList()) {
+				final ArrayList<List<Byte>> al = new ArrayList<List<Byte>>();
+				al.add(listFromArray(lb.get(nextArray++)));
+				bf.parse(al, wifi);
+			} else {
+				final ArrayList<List<Byte>> al = new ArrayList<List<Byte>>();
+				final List<byte[]> list = llb.get(nextListOfArrays++);
+				for (byte[] bs : list) {
+					al.add(listFromArray(bs));
+				}
+				bf.parse(al, wifi);
+			}
+		}
+		return wifi;
 	}
 
 	// =========================================================================
