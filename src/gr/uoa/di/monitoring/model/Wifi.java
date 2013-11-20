@@ -230,38 +230,26 @@ public final class Wifi extends Data {
 		}
 
 		/**
-		 * This extracts from data the *only* the non list fields (currently
-		 * TIME). TODO : unify with createListOfListsOfByteArrays
+		 * Extracts from data given by android the bytes representing the data
+		 * we are interested in. The returned List<List<byte[]>> has as many
+		 * elements as the Fields. The elements of this List for the *list*
+		 * fields - those fields that isList() returns true (the properties for
+		 * *each* network) - are List<byte[]> which have as many elements as the
+		 * available networks - one byte[] for each. The non list fields
+		 * (currently TIME) are List<byte[]> with a single byte[] element
+		 * (containing the time as a byte[] in our case)
 		 *
 		 * @param data
 		 *            the list of ScanResult
-		 * @return a List<byte[]> which is essentially a one element list
-		 *         containing the time as a byte[]
-		 */
-		public static List<byte[]>
-				createListOfByteArrays(List<ScanResult> data) {
-			final List<byte[]> listByteArrays = new ArrayList<byte[]>();
-			for (WifiFields bs : WifiFields.values()) {
-				if (!bs.isList()) listByteArrays.add(bs.getData(data).get(0));
-			}
-			return listByteArrays;
-		}
-
-		/**
-		 * This extracts from data *only* the *list* fields (the properties of
-		 * *each* network).
-		 *
-		 * @param data
-		 *            the list of ScanResult
-		 * @return a List<List<byte[]>> which is has as many elements as the
-		 *         list Fields each of which has as many elements as the
-		 *         networks scanned
+		 * @return a List<List<byte[]>> which has as many elements as the Fields
+		 *         each of which has as many elements as the networks scanned
+		 *         for the isList() fields or a single element otherwise
 		 */
 		public static List<List<byte[]>> createListOfListsOfByteArrays(
 				List<ScanResult> data) {
 			final List<List<byte[]>> listofListsOfByteArrays = new ArrayList<List<byte[]>>();
 			for (WifiFields bs : WifiFields.values()) {
-				if (bs.isList()) listofListsOfByteArrays.add(bs.getData(data));
+				listofListsOfByteArrays.add(bs.getData(data));
 			}
 			return listofListsOfByteArrays;
 		}
@@ -324,11 +312,9 @@ public final class Wifi extends Data {
 	}
 
 	public static <T extends Enum<T> & Fields<?, ?, ?>> void saveData(
-			Context ctx, List<byte[]> listByteArrays,
-			List<List<byte[]>> listOfListsOfByteArrays, Class<T> fields)
-			throws FileNotFoundException, IOException {
-		Persist.saveData(ctx, FILE_PREFIX, listByteArrays,
-			listOfListsOfByteArrays, fields);
+			Context ctx, List<List<byte[]>> listOfListsOfByteArrays,
+			Class<T> fields) throws FileNotFoundException, IOException {
+		Persist.saveData(ctx, FILE_PREFIX, listOfListsOfByteArrays, fields);
 	}
 
 	@Override
@@ -345,15 +331,14 @@ public final class Wifi extends Data {
 		return super.toString() + N + sb.toString();
 	}
 
-	public static Wifi fromBytes(List<byte[]> lb, List<List<byte[]>> llb)
+	public static Wifi fromBytes(List<List<byte[]>> llb)
 			throws ParserException {
 		Wifi wifi = new Wifi("");
-		int nextArray = 0;
 		int nextListOfArrays = 0;
 		for (WifiFields bf : WifiFields.values()) {
 			if (!bf.isList()) {
 				final ArrayList<List<Byte>> al = new ArrayList<List<Byte>>();
-				al.add(listFromArray(lb.get(nextArray++)));
+				al.add(listFromArray(llb.get(nextListOfArrays++).get(0)));
 				bf.parse(al, wifi);
 			} else {
 				final ArrayList<List<Byte>> al = new ArrayList<List<Byte>>();

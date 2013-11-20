@@ -106,12 +106,12 @@ public final class Persist {
 	}
 
 	public static <T extends Enum<T> & Fields<?, ?, ?>> void saveData(
-			Context ctx, String filename, List<byte[]> listByteArrays,
+			Context ctx, String filename,
 			List<List<byte[]>> listOfListsOfByteArrays, Class<T> fields)
 			throws FileNotFoundException, IOException {
 		// internal storage
 		persist(dataFileInInternalStorage(getRootFolder(ctx), filename),
-			fields, listByteArrays, listOfListsOfByteArrays);
+			fields, listOfListsOfByteArrays);
 	}
 
 	/**
@@ -157,7 +157,6 @@ public final class Persist {
 	 */
 	public static <T extends Enum<T> & Fields<?, ?, ?>> void persist(
 			final File file, final Class<T> fields,
-			final List<byte[]> listByteArrays,
 			final List<List<byte[]>> listsOfByteArrays)
 			throws FileNotFoundException, IOException {
 		/*
@@ -174,7 +173,6 @@ public final class Persist {
 		 * item is followed by NEWLINE (not DELIMITER).
 		 */
 		byte[] result = new byte[0];
-		int nextArray = 0;
 		int nextListOfArrays = 0;
 		for (T field : fields.getEnumConstants()) {
 			if (field.isList()) {
@@ -184,7 +182,8 @@ public final class Persist {
 				result[result.length - 1] = DELIMITER;
 			} else {
 				result = appendArrayToByteArray(
-					listByteArrays.get(nextArray++), DELIMITER, result);
+					listsOfByteArrays.get(nextListOfArrays++).get(0),
+					DELIMITER, result);
 			}
 		}
 		result[result.length - 1] = NEWLINE;
