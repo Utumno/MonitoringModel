@@ -283,6 +283,7 @@ public final class Wifi extends Data {
 
 	public static class Network {
 
+		private static final String SEP = ", ";
 		private String ssid;
 		private String bssid;
 		private int frequency;
@@ -290,8 +291,8 @@ public final class Wifi extends Data {
 
 		@Override
 		public String toString() {
-			return "Ssid=" + ssid + ", Bssid=" + bssid + ", Frequency="
-				+ frequency + ", Level=" + level;
+			return "Ssid" + IS + ssid + SEP + "Bssid" + IS + bssid + SEP
+				+ "Frequency" + IS + frequency + SEP + "Level" + IS + level;
 		}
 
 		public String getSsid() {
@@ -308,6 +309,25 @@ public final class Wifi extends Data {
 
 		public int getLevel() {
 			return level;
+		}
+
+		/**
+		 * Returns true if the given net has the same ssid and bssid as this
+		 *
+		 * @throws NullPointerException
+		 *             if net.ssid or net.bssid == null
+		 */
+		boolean fairlyEqual(final Network net) {
+			if (net == null) return false;
+			return net.ssid.equals(this.ssid) && net.bssid.equals(this.bssid);
+		}
+
+		public static Network fromString(String string) {
+			final Network network = new Network();
+			String[] split = string.split(SEP);
+			network.ssid = split[0].split(IS)[1].trim();
+			network.bssid = split[1].split(IS)[1].trim();
+			return network;
 		}
 	}
 
@@ -331,8 +351,16 @@ public final class Wifi extends Data {
 		return super.toString() + N + sb.toString();
 	}
 
-	public static Wifi fromBytes(List<List<byte[]>> llb)
-			throws ParserException {
+	@Override
+	public String stringForm() {
+		final StringBuilder sb = new StringBuilder();
+		for (Network net : networks) {
+			sb.append(net).append(N);
+		}
+		return time + N + sb.toString();
+	}
+
+	public static Wifi fromBytes(List<List<byte[]>> llb) throws ParserException {
 		Wifi wifi = new Wifi("");
 		int nextListOfArrays = 0;
 		for (WifiFields bf : WifiFields.values()) {
@@ -350,6 +378,45 @@ public final class Wifi extends Data {
 			}
 		}
 		return wifi;
+	}
+
+	/**
+	 * Constructs a Wifi instance from the given string. Only the fields that
+	 * matter to {@link #fairlyEqual(Data)} are filled (and time for debugging
+	 * purposes)
+	 */
+	public static Wifi fromString(String s) {
+		if (s == null || s.trim().equals("")) return null;
+		final Wifi p = new Wifi("");
+		p.networks = new ArrayList<Wifi.Network>();
+		String[] split = s.split(N);
+		p.time = Long.valueOf(split[0]);
+		for (int i = 1; i < split.length; ++i) {
+			p.networks.add(Wifi.Network.fromString(split[i]));
+		}
+		return p;
+	}
+
+	/**
+	 * Two Wifi instances are fairlyEqual if they contain the same number of
+	 * fairly equal (ssid and bssid) networks
+	 *
+	 * @throws NullPointerException
+	 *             if d.networks == null or if any of the w.networks has null
+	 *             ssid or bssid
+	 */
+	@Override
+	public boolean fairlyEqual(final Data d) {
+		if (d == null || !(d instanceof Wifi)) return false;
+		final Wifi w = (Wifi) d;
+		if (w.networks.size() != this.networks.size()) return false;
+		main: for (Network net : w.networks) {
+			for (Network thisNet : this.networks) {
+				if (thisNet.fairlyEqual(net)) continue main;
+			}
+			return false;
+		}
+		return true;
 	}
 
 	// =========================================================================

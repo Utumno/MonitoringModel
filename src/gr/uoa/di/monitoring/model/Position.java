@@ -175,8 +175,14 @@ public final class Position extends Data {
 
 	@Override
 	public String toString() {
-		return super.toString() + N + "Longitude : " + longitude + N
-			+ "Latitude : " + latitude + N + "Provider : " + provider;
+		return super.toString() + N + "Longitude" + IS + longitude + N
+			+ "Latitude" + IS + latitude + N + "Provider" + IS + provider;
+	}
+
+	@Override
+	public String stringForm() {
+		return time + N + "Longitude" + IS + longitude + N + "Latitude" + IS
+			+ latitude + N + "Provider" + IS + provider;
 	}
 
 	public static Position fromBytes(List<byte[]> lb) throws ParserException {
@@ -186,6 +192,38 @@ public final class Position extends Data {
 			bf.parse(listFromArray(lb.get(i++)), battery);
 		}
 		return battery;
+	}
+
+	/**
+	 * Two Position instances are fairlyEqual if they have the same longitude,
+	 * latitude and provider. FIXME : compare into some meters accuracy
+	 *
+	 * @throws NullPointerException
+	 *             if d.provider == null
+	 */
+	@Override
+	public boolean fairlyEqual(Data d) {
+		if (d == null || !(d instanceof Position)) return false;
+		final Position p = (Position) d;
+		return p.latitude == this.latitude && p.longitude == this.longitude
+			&& p.provider.equals(this.provider);
+	}
+
+	/**
+	 * Constructs a Position instance from the given string. Only the fields
+	 * that matter to {@link #fairlyEqual(Data)} are filled (and time for
+	 * debugging purposes)
+	 */
+	public static Position fromString(String s) {
+		if (s == null || s.trim().equals("")) return null;
+		final Position p = new Position("");
+		String[] split = s.split(N);
+		p.time = Long.valueOf(split[0]);
+		int i = 0;
+		p.longitude = Double.valueOf(split[++i].split(IS)[1].trim());
+		p.latitude = Double.valueOf(split[++i].split(IS)[1].trim());
+		p.provider = split[++i].split(IS)[1].trim();
+		return p;
 	}
 
 	// =========================================================================

@@ -130,7 +130,12 @@ public final class Battery extends Data {
 
 	@Override
 	public String toString() {
-		return super.toString() + N + "Status : " + status;
+		return super.toString() + N + "Status" + IS + status;
+	}
+
+	@Override
+	public String stringForm() {
+		return time + N + "Status" + IS + status;
 	}
 
 	public static Battery fromBytes(List<byte[]> lb) throws ParserException {
@@ -140,6 +145,33 @@ public final class Battery extends Data {
 			bf.parse(listFromArray(lb.get(i++)), battery);
 		}
 		return battery;
+	}
+
+	/**
+	 * Two Battery instances are fairlyEqual if they have the same status
+	 *
+	 * @throws NullPointerException
+	 *             if d.status == null
+	 */
+	@Override
+	public boolean fairlyEqual(final Data d) throws NullPointerException {
+		if (d == null || !(d instanceof Battery)) return false;
+		final Battery b = (Battery) d;
+		return b.status.equals(this.status); // NPE here
+	}
+
+	/**
+	 * Constructs a Battery instance from the given string. Only the fields that
+	 * matter to {@link #fairlyEqual(Data)} are filled (and time for debugging
+	 * purposes)
+	 */
+	public static Battery fromString(String s) {
+		if (s == null || s.trim().equals("")) return null;
+		final Battery b = new Battery("");
+		String[] split = s.split(N);
+		b.time = Long.valueOf(split[0]);
+		b.status = split[1].split(IS)[1].trim();
+		return b;
 	}
 
 	// =========================================================================

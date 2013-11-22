@@ -14,6 +14,7 @@ public abstract class Data {
 	private String imei;
 	long time; // the subclasses set this
 	static final String N = System.getProperty("line.separator");
+	static final String IS = ": ";
 
 	public Data(String imei) {
 		this.imei = imei;
@@ -40,8 +41,32 @@ public abstract class Data {
 
 	@Override
 	public String toString() {
-		return "Time : " + new Date(time);
+		return "Time" + IS + new Date(time);
 	}
+
+	/**
+	 * Compares two data instances to see if they are fairly equal. Fairly equal
+	 * is defined in individual types. It checks equality of some basic
+	 * attributes
+	 *
+	 * @param d
+	 *            the other data
+	 * @return true if this is fairly equal with the other, false otherwise
+	 *         (including the case they are instances of different types or d is
+	 *         null)
+	 * @throws NullPointerException
+	 *             if any of the String required attributes is null
+	 */
+	abstract public boolean fairlyEqual(final Data d)
+			throws NullPointerException;
+
+	/**
+	 * Use this to persist the datum in string form. It keeps the time as long
+	 * to easily manipulate it.
+	 *
+	 * @return a string representation of the Data object to be persisted
+	 */
+	abstract public String stringForm();
 
 	// =========================================================================
 	// Accessors
