@@ -3,7 +3,6 @@ package gr.uoa.di.monitoring.android.persist;
 import gr.uoa.di.java.helpers.Utils;
 import gr.uoa.di.monitoring.model.Battery;
 import gr.uoa.di.monitoring.model.Data;
-import gr.uoa.di.monitoring.model.ParserException;
 import gr.uoa.di.monitoring.model.Position;
 import gr.uoa.di.monitoring.model.Wifi;
 
