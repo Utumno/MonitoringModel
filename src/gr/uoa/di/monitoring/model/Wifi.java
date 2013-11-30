@@ -69,6 +69,11 @@ public final class Wifi extends Data {
 				List<byte[]> arrayList = new ArrayList<byte[]>();
 				if (scanRes != null) {
 					for (ScanResult loc : scanRes) {
+						// ISSUE 6 - must get the SSID from the service and
+						// check for UTF and non printable characters. If any
+						// found I must replace it with a non present char and
+						// add this info on the string byte[]. Also check what
+						// do I do with empty null SSIDs and hidden ones
 						arrayList.add(EncodingUtils.getAsciiBytes(loc.SSID));
 					}
 				}
@@ -78,12 +83,14 @@ public final class Wifi extends Data {
 			@Override
 			public Wifi parse(List<List<Byte>> list, Wifi wi)
 					throws ParserException {
+				// wi.networks FIRST POPULATED HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!
 				final List<Network> nets = wi.networks;
 				try {
 					for (List<Byte> lb : list) {
 						String ssid = listToString(lb, FileStore.FILES_ENCODING);
-						// FIXME TODO networks first created here
-						// TODO check what do I do with empty null SSIDs ?
+						// ISSUE 6 - here I must parse the extra info to see if
+						// the SSID I got is unicode or has "exotic" (non
+						// printable) characters
 						Network n = new Network();
 						n.ssid = ssid;
 						nets.add(n);

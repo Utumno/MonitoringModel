@@ -27,7 +27,7 @@ public final class FileStore {
 	private FileStore() {}
 
 	static final String FILENAME_SEPA = "_";
-	// TODO : can any of my data contain those delimiters ?
+	// ISSUE 6 : only the SSIDs can contain it - I must provide for it
 	static final byte DELIMITER = 0;
 	static final byte ARRAY_DELIMITER = 1;
 	static final byte NEWLINE = '\n';
@@ -136,10 +136,9 @@ public final class FileStore {
 	 * See <a href="http://stackoverflow.com/questions/19067244/">What is the
 	 * result of buffering a buffered stream in java?</a>
 	 *
-	 * @param <K>
-	 *
 	 * @param is
-	 *            an input stream
+	 *            an input stream, should be a FileInputStream of a file
+	 *            containing data to be parsed by the Fields class given
 	 * @param f
 	 *            the Fields class of interest
 	 * @return A list (one element per entry in the file) of EnumMapS mapping
@@ -149,7 +148,7 @@ public final class FileStore {
 	 */
 	public static <D, T extends Enum<T> & Fields<?, ?, D>> List<EnumMap<T, D>>
 			getEntries(InputStream is, Class<T> fields) throws IOException {
-		BufferedInputStream bis = new BufferedInputStream(is,
+		final BufferedInputStream bis = new BufferedInputStream(is,
 			INPUT_STREAM_BUFFER_SIZE);
 		final List<List<Byte>> entries = new ArrayList<List<Byte>>();
 		{

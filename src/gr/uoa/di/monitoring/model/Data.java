@@ -11,7 +11,7 @@ public abstract class Data {
 	 * String (not long) to cater for cases when IMEI is not available and for
 	 * preparing the ground for better unique identifiers
 	 */
-	private String imei;
+	final private String imei;
 	long time; // the subclasses set this
 	static final String N = System.getProperty("line.separator");
 	static final String IS = ": ";

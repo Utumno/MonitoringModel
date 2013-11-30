@@ -28,6 +28,160 @@ public final class Persist {
 	private static volatile File sRootFolder; // TODO : cache but can lead to
 	// NPEs - ask : enforce access to static fields via getter
 
+	// public
+	public static void saveData(Context ctx, String filename,
+			List<byte[]> listByteArrays) throws FileNotFoundException,
+			IOException {
+		// internal storage
+		persist(dataFileInInternalStorage(getRootFolder(ctx), filename),
+			listByteArrays);
+	}
+
+	public static <T extends Enum<T> & Fields<?, ?, ?>> void saveData(
+			Context ctx, String filename,
+			List<List<byte[]>> listOfListsOfByteArrays, Class<T> fields)
+			throws FileNotFoundException, IOException {
+		// internal storage
+		persist(dataFileInInternalStorage(getRootFolder(ctx), filename),
+			fields, listOfListsOfByteArrays);
+	}
+
+	/**
+	 * Checks if there are available data by checking the size of the internal
+	 * directory where the data is saved. If the internal directory does not
+	 * exist this method will try to create it
+	 *
+	 * @param ctx
+	 *            needed to retrieve the internal directory
+	 * @return true if the directory exists (will exist except if IOException is
+	 *         thrown on creation) and is not empty, false otherwise
+	 * @throws IOException
+	 *             if the internal directory can't be created
+	 */
+	public static boolean availableData(Context ctx) throws IOException {
+		return !FileIO.isEmptyOrAbsent(getRootFolder(ctx)); // won't be absent,
+		// getRootFolder() will create it
+	}
+
+	/**
+	 * Returns a list of application files in the internal directory where the
+	 * data is saved. If the internal directory does not exist this method will
+	 * try to create it
+	 *
+	 * @param ctx
+	 *            needed to retrieve the internal directory
+	 * @return true if the directory exists and is not empty, false otherwise
+	 * @throws IOException
+	 *             if the internal directory can't be created
+	 */
+	public static List<File> internalFiles(Context ctx) throws IOException {
+		return FileIO.listFiles(getRootFolder(ctx));
+	}
+
+	/**
+	 * Returns a zip file containing the internal folder with the data files
+	 *
+	 * @param ctx
+	 *            Context needed to access the internal storage
+	 * @return a zip file containing the folder with the data files
+	 * @throws IOException
+	 *             if the internal folder can't be accessed or the zip file
+	 *             can't be created
+	 */
+	public static File file(Context ctx) throws IOException {
+		try {
+			final String rootPath = getRootFolder(ctx).getAbsolutePath();
+			final String destination = filename(rootPath);
+			return gr.uoa.di.java.helpers.Zip.zipFolder(rootPath, destination)
+				.getFile();
+			// final String backFilename = System.currentTimeMillis() + ".zip";
+			// FileIO.copyFileFromInternalToExternalStorage(destination,
+			// LOG_DIR, backFilename);
+		} catch (CompressException e) {
+			throw new IOException("Unable to create zip file :" + e);
+		}
+	}
+
+	// private persist methods
+	/**
+	 * Persists the items (arrays of bytes) contained in {@code listByteArrays}
+	 * in the given {@code file} which may lie in external or internal storage.
+	 * It acquires the {@code FILE_STORE_LOCK} to do so.
+	 *
+	 * @param file
+	 * @param listByteArrays
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
+	private static void persist(final File file,
+			final List<byte[]> listByteArrays) throws FileNotFoundException,
+			IOException {
+		/*
+		 * The bytes contained in each item in the list are persisted in turn
+		 * and are separated by the next chunk of bytes by DELIMITER. The last
+		 * one is followed by NEWLINE (not DELIMITER).
+		 */
+		byte[] result = listOfArraysToByteArray(listByteArrays, DELIMITER,
+			new byte[0]);
+		result[result.length - 1] = NEWLINE;
+		synchronized (FILE_STORE_LOCK) {
+			FileIO.append(file, result);
+		}
+	}
+
+	/**
+	 * Persists the given data in the given {@code file} which may lie in
+	 * external or internal storage. It acquires the {@code FILE_STORE_LOCK} to
+	 * do so.
+	 *
+	 * @param <T>
+	 *            must be an enum that extends Fields
+	 * @param file
+	 * @param fields
+	 * @param listByteArrays
+	 * @param listsOfByteArrays
+	 * @throws FileNotFoundException
+	 *             if the {@code file} is not found
+	 * @throws IOException
+	 */
+	private static <T extends Enum<T> & Fields<?, ?, ?>> void persist(
+			final File file, final Class<T> fields,
+			final List<List<byte[]>> listsOfByteArrays)
+			throws FileNotFoundException, IOException {
+		/*
+		 * Each item (chunk of bytes) is separated by the next one by DELIMITER.
+		 * The items may be either a byte[] (an element of the {@code
+		 * listByteArrays}), or a whole List<byte[]> (member of {@code
+		 * listsOfByteArrays}). In the latter case each byte[] belonging to
+		 * {@code listsOfByteArrays} is persisted in turn and separated by the
+		 * next by ARRAY_DELIMITER. The last array is separated by the next
+		 * chunk by DELIMITER as before. The order of the items is given by the
+		 * order of the Lists themselves in combination with the {@code fields}
+		 * which also provides the info whether the next item is to be retrieved
+		 * from {@code listsOfByteArrays} or {@code listByteArrays}. The last
+		 * item is followed by NEWLINE (not DELIMITER).
+		 */
+		byte[] result = new byte[0];
+		int nextListOfArrays = 0;
+		for (T field : fields.getEnumConstants()) {
+			if (field.isList()) {
+				result = listOfArraysToByteArray(
+					listsOfByteArrays.get(nextListOfArrays++), ARRAY_DELIMITER,
+					result);
+				result[result.length - 1] = DELIMITER;
+			} else {
+				result = appendArrayToByteArray(
+					listsOfByteArrays.get(nextListOfArrays++).get(0),
+					DELIMITER, result);
+			}
+		}
+		result[result.length - 1] = NEWLINE;
+		synchronized (FILE_STORE_LOCK) {
+			FileIO.append(file, result);
+		}
+	}
+
+	// private filesystem methods
 	/**
 	 * Returns the root folder in internal storage where the data is kept. Will
 	 * create it if it does not exist. {@code sRootFolder} must ONLY be accessed
@@ -94,158 +248,6 @@ public final class Persist {
 			return new File(internalDir, filename);
 		throw new IOException(internalDir.getAbsolutePath()
 			+ " does not exist or is not a directory.");
-	}
-
-	// public
-	public static void saveData(Context ctx, String filename,
-			List<byte[]> listByteArrays) throws FileNotFoundException,
-			IOException {
-		// internal storage
-		persist(dataFileInInternalStorage(getRootFolder(ctx), filename),
-			listByteArrays);
-	}
-
-	public static <T extends Enum<T> & Fields<?, ?, ?>> void saveData(
-			Context ctx, String filename,
-			List<List<byte[]>> listOfListsOfByteArrays, Class<T> fields)
-			throws FileNotFoundException, IOException {
-		// internal storage
-		persist(dataFileInInternalStorage(getRootFolder(ctx), filename),
-			fields, listOfListsOfByteArrays);
-	}
-
-	/**
-	 * Persists the items (arrays of bytes) contained in {@code listByteArrays}
-	 * in the given {@code file} which may lie in external or internal storage.
-	 * It acquires the {@code FILE_STORE_LOCK} to do so.
-	 *
-	 * @param file
-	 * @param listByteArrays
-	 * @throws FileNotFoundException
-	 * @throws IOException
-	 */
-	public static void persist(final File file,
-			final List<byte[]> listByteArrays) throws FileNotFoundException,
-			IOException {
-		/*
-		 * The bytes contained in each item in the list are persisted in turn
-		 * and are separated by the next chunk of bytes by DELIMITER. The last
-		 * one is followed by NEWLINE (not DELIMITER).
-		 */
-		byte[] result = listOfArraysToByteArray(listByteArrays, DELIMITER,
-			new byte[0]);
-		result[result.length - 1] = NEWLINE;
-		synchronized (FILE_STORE_LOCK) {
-			FileIO.append(file, result);
-		}
-	}
-
-	/**
-	 * Persists the given data in the given {@code file} which may lie in
-	 * external or internal storage. It acquires the {@code FILE_STORE_LOCK} to
-	 * do so.
-	 *
-	 * @param <T>
-	 *            must be an enum that extends Fields
-	 * @param file
-	 * @param fields
-	 * @param listByteArrays
-	 * @param listsOfByteArrays
-	 * @throws FileNotFoundException
-	 *             if the {@code file} is not found
-	 * @throws IOException
-	 */
-	public static <T extends Enum<T> & Fields<?, ?, ?>> void persist(
-			final File file, final Class<T> fields,
-			final List<List<byte[]>> listsOfByteArrays)
-			throws FileNotFoundException, IOException {
-		/*
-		 * Each item (chunk of bytes) is separated by the next one by DELIMITER.
-		 * The items may be either a byte[] (an element of the {@code
-		 * listByteArrays}), or a whole List<byte[]> (member of {@code
-		 * listsOfByteArrays}). In the latter case each byte[] belonging to
-		 * {@code listsOfByteArrays} is persisted in turn and separated by the
-		 * next by ARRAY_DELIMITER. The last array is separated by the next
-		 * chunk by DELIMITER as before. The order of the items is given by the
-		 * order of the Lists themselves in combination with the {@code fields}
-		 * which also provides the info whether the next item is to be retrieved
-		 * from {@code listsOfByteArrays} or {@code listByteArrays}. The last
-		 * item is followed by NEWLINE (not DELIMITER).
-		 */
-		byte[] result = new byte[0];
-		int nextListOfArrays = 0;
-		for (T field : fields.getEnumConstants()) {
-			if (field.isList()) {
-				result = listOfArraysToByteArray(
-					listsOfByteArrays.get(nextListOfArrays++), ARRAY_DELIMITER,
-					result);
-				result[result.length - 1] = DELIMITER;
-			} else {
-				result = appendArrayToByteArray(
-					listsOfByteArrays.get(nextListOfArrays++).get(0),
-					DELIMITER, result);
-			}
-		}
-		result[result.length - 1] = NEWLINE;
-		synchronized (FILE_STORE_LOCK) {
-			FileIO.append(file, result);
-		}
-	}
-
-	/**
-	 * Checks if there are available data by checking the size of the internal
-	 * directory where the data is saved. If the internal directory does not
-	 * exist this method will try to create it
-	 *
-	 * @param ctx
-	 *            needed to retrieve the internal directory
-	 * @return true if the directory exists (will exist except if IOException is
-	 *         thrown on creation) and is not empty, false otherwise
-	 * @throws IOException
-	 *             if the internal directory can't be created
-	 */
-	public static boolean availableData(Context ctx) throws IOException {
-		return !FileIO.isEmptyOrAbsent(getRootFolder(ctx)); // won't be absent,
-		// getRootFolder() will create it
-	}
-
-	/**
-	 * Returns a list of application files in the internal directory where the
-	 * data is saved. If the internal directory does not exist this method will
-	 * try to create it
-	 *
-	 * @param ctx
-	 *            needed to retrieve the internal directory
-	 * @return true if the directory exists and is not empty, false otherwise
-	 * @throws IOException
-	 *             if the internal directory can't be created
-	 */
-	public static List<File> internalFiles(Context ctx) throws IOException {
-		return FileIO.listFiles(getRootFolder(ctx));
-	}
-
-	/**
-	 * Returns a zip file containing the internal folder with the data files
-	 *
-	 * @param ctx
-	 *            Context needed to access the internal storage
-	 * @return a zip file containing the folder with the data files
-	 * @throws IOException
-	 *             if the internal folder can't be accessed or the zip file
-	 *             can't be created
-	 */
-	public static File file(Context ctx) throws IOException {
-		try {
-			final String rootPath = getRootFolder(ctx).getAbsolutePath();
-			final String destination = filename(rootPath);
-			return gr.uoa.di.java.helpers.Zip.zipFolder(rootPath, destination)
-				.getFile();
-			// final String backFilename = System.currentTimeMillis() + ".zip";
-			// FileIO.copyFileFromInternalToExternalStorage(destination,
-			// LOG_DIR, backFilename);
-		} catch (CompressException e) {
-			throw new IOException("Unable to create zip file :" + e);
-		}
 	}
 
 	// helpers
