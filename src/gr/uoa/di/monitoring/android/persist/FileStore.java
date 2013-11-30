@@ -48,9 +48,9 @@ public final class FileStore {
 	private final static Map<Class<? extends Data>, String> DATA_CLASSES =
 			new HashMap<Class<? extends Data>, String>();
 	static {
-		DATA_CLASSES.put(Battery.class, new Battery("").getFilename());
-		DATA_CLASSES.put(Position.class, new Position("").getFilename());
-		DATA_CLASSES.put(Wifi.class, new Wifi("").getFilename());
+		DATA_CLASSES.put(Battery.class, new Battery().getFilename());
+		DATA_CLASSES.put(Position.class, new Position().getFilename());
+		DATA_CLASSES.put(Wifi.class, new Wifi().getFilename());
 	}
 
 	/**
@@ -97,7 +97,7 @@ public final class FileStore {
 	// Parsers
 	// =========================================================================
 	public static <T extends Data> Map<Class<? extends Data>, List<T>> parse(
-			String rootPath, String imei) throws ParserException {
+			String rootPath) throws ParserException {
 		Map<Class<? extends Data>, List<T>> lol =
 				new HashMap<Class<? extends Data>, List<T>>();
 		for (Entry<Class<? extends Data>, String> entry : DATA_CLASSES
@@ -106,13 +106,13 @@ public final class FileStore {
 			final Class<? extends Data> dataCls = entry.getKey();
 			Method pars = null;
 			try {
-				pars = dataCls.getMethod("parse", File.class, String.class);
+				pars = dataCls.getMethod("parse", File.class);
 			} catch (NoSuchMethodException e) {
 				throw new ParserException("Reflection failure", e);
 			}
 			List<T> invoke = null;
 			try {
-				invoke = (List<T>) pars.invoke(null, file, imei);
+				invoke = (List<T>) pars.invoke(null, file);
 			} catch (IllegalArgumentException e) {
 				throw new ParserException("Reflection failure", e);
 			} catch (IllegalAccessException e) {

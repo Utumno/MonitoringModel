@@ -28,10 +28,6 @@ public final class Wifi extends Data {
 	private List<Network> networks = new ArrayList<Wifi.Network>();
 	private static final String FILE_PREFIX = "wifi";
 
-	public Wifi(String imei) {
-		super(imei);
-	}
-
 	public static enum WifiFields implements
 			FileStore.Fields<List<ScanResult>, Wifi, List<List<Byte>>> {
 		/*
@@ -264,8 +260,7 @@ public final class Wifi extends Data {
 	}
 
 	// TODO move this into base class Data and make it abstract
-	public static List<Wifi> parse(File f, String imei) throws IOException,
-			ParserException {
+	public static List<Wifi> parse(File f) throws IOException, ParserException {
 		final FileInputStream fis = new FileInputStream(f);
 		List<EnumMap<WifiFields, List<List<Byte>>>> entries;
 		try {
@@ -280,7 +275,7 @@ public final class Wifi extends Data {
 		}
 		final List<Wifi> data = new ArrayList<Wifi>();
 		for (EnumMap<WifiFields, List<List<Byte>>> enumMap : entries) {
-			Wifi bat = new Wifi(imei);
+			Wifi bat = new Wifi();
 			for (WifiFields field : enumMap.keySet()) {
 				/* bat = */field.parse(enumMap.get(field), bat);
 			}
@@ -369,7 +364,7 @@ public final class Wifi extends Data {
 	}
 
 	public static Wifi fromBytes(List<List<byte[]>> llb) throws ParserException {
-		Wifi wifi = new Wifi("");
+		Wifi wifi = new Wifi();
 		int nextListOfArrays = 0;
 		for (WifiFields bf : WifiFields.values()) {
 			if (!bf.isList()) {
@@ -395,7 +390,7 @@ public final class Wifi extends Data {
 	 */
 	public static Wifi fromString(String s) {
 		if (s == null || s.trim().equals("")) return null;
-		final Wifi p = new Wifi("");
+		final Wifi p = new Wifi();
 		p.networks = new ArrayList<Wifi.Network>();
 		String[] split = s.split(N);
 		p.time = Long.valueOf(split[0]);

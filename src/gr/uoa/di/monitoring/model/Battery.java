@@ -26,10 +26,6 @@ import static gr.uoa.di.java.helpers.Utils.listToString;
 
 public final class Battery extends Data {
 
-	public Battery(String imei) {
-		super(imei);
-	}
-
 	private String status;
 	private static final String FILE_PREFIX = "batt";
 
@@ -93,7 +89,7 @@ public final class Battery extends Data {
 	}
 
 	// TODO move this into base class Data and make it abstract
-	public static List<Battery> parse(File f, String imei) throws IOException,
+	public static List<Battery> parse(File f) throws IOException,
 			ParserException {
 		final FileInputStream fis = new FileInputStream(f);
 		List<EnumMap<BatteryFields, List<Byte>>> entries;
@@ -109,7 +105,7 @@ public final class Battery extends Data {
 		}
 		final List<Battery> data = new ArrayList<Battery>();
 		for (EnumMap<BatteryFields, List<Byte>> enumMap : entries) {
-			Battery bat = new Battery(imei);
+			Battery bat = new Battery();
 			for (BatteryFields field : enumMap.keySet()) {
 				/* bat = */field.parse(enumMap.get(field), bat);
 			}
@@ -140,7 +136,7 @@ public final class Battery extends Data {
 	}
 
 	public static Battery fromBytes(List<byte[]> lb) throws ParserException {
-		Battery battery = new Battery("");
+		Battery battery = new Battery();
 		int i = 0;
 		for (BatteryFields bf : BatteryFields.values()) {
 			bf.parse(listFromArray(lb.get(i++)), battery);
@@ -168,7 +164,7 @@ public final class Battery extends Data {
 	 */
 	public static Battery fromString(String s) {
 		if (s == null || s.trim().equals("")) return null;
-		final Battery b = new Battery("");
+		final Battery b = new Battery();
 		String[] split = s.split(N);
 		b.time = Long.valueOf(split[0]);
 		b.status = split[1].split(IS)[1].trim();

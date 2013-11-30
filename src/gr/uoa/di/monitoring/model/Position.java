@@ -31,10 +31,6 @@ public final class Position extends Data {
 	private String provider;
 	private static final String FILE_PREFIX = "loc";
 
-	public Position(String imei) {
-		super(imei);
-	}
-
 	public static enum LocationFields implements
 			FileStore.Fields<Location, Position, List<Byte>> {
 		TIME {
@@ -144,7 +140,7 @@ public final class Position extends Data {
 	}
 
 	// TODO move this into base class Data and make it abstract
-	public static List<Position> parse(File f, String imei) throws IOException,
+	public static List<Position> parse(File f) throws IOException,
 			ParserException {
 		final FileInputStream fis = new FileInputStream(f);
 		List<EnumMap<LocationFields, List<Byte>>> entries;
@@ -160,7 +156,7 @@ public final class Position extends Data {
 		}
 		final List<Position> data = new ArrayList<Position>();
 		for (EnumMap<LocationFields, List<Byte>> enumMap : entries) {
-			Position bat = new Position(imei);
+			Position bat = new Position();
 			for (LocationFields field : enumMap.keySet()) {
 				/* bat = */field.parse(enumMap.get(field), bat);
 			}
@@ -187,7 +183,7 @@ public final class Position extends Data {
 	}
 
 	public static Position fromBytes(List<byte[]> lb) throws ParserException {
-		Position battery = new Position("");
+		Position battery = new Position();
 		int i = 0;
 		for (LocationFields bf : LocationFields.values()) {
 			bf.parse(listFromArray(lb.get(i++)), battery);
@@ -217,7 +213,7 @@ public final class Position extends Data {
 	 */
 	public static Position fromString(String s) {
 		if (s == null || s.trim().equals("")) return null;
-		final Position p = new Position("");
+		final Position p = new Position();
 		String[] split = s.split(N);
 		p.time = Long.valueOf(split[0]);
 		int i = 0;
