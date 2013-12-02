@@ -25,7 +25,7 @@ import static gr.uoa.di.java.helpers.Utils.listToString;
 
 public final class Battery extends Data {
 
-	private String status;
+	String status;
 	private static final String FILE_PREFIX = "batt";
 
 	public static enum BatteryFields implements

@@ -25,9 +25,9 @@ import static gr.uoa.di.java.helpers.Utils.listToString;
 
 public final class Position extends Data {
 
-	private double latitude;
-	private double longitude;
-	private String provider;
+	double latitude;
+	double longitude;
+	String provider;
 	private static final String FILE_PREFIX = "loc";
 
 	public static enum LocationFields implements

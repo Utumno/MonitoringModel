@@ -24,7 +24,7 @@ import static gr.uoa.di.java.helpers.Utils.listToString;
 
 public final class Wifi extends Data {
 
-	private List<Network> networks = new ArrayList<Wifi.Network>();
+	final List<Network> networks = new ArrayList<Wifi.Network>();
 	private static final String FILE_PREFIX = "wifi";
 
 	public static enum WifiFields implements
@@ -276,34 +276,18 @@ public final class Wifi extends Data {
 		return data;
 	}
 
-	public static class Network {
+	static class Network {
 
 		private static final String SEP = ", ";
-		private String ssid;
-		private String bssid;
-		private int frequency;
-		private int level;
+		String ssid;
+		String bssid;
+		int frequency;
+		int level;
 
 		@Override
 		public String toString() {
 			return "Ssid" + IS + ssid + SEP + "Bssid" + IS + bssid + SEP
 				+ "Frequency" + IS + frequency + SEP + "Level" + IS + level;
-		}
-
-		public String getSsid() {
-			return ssid;
-		}
-
-		public String getBssid() {
-			return bssid;
-		}
-
-		public int getFrequency() {
-			return frequency;
-		}
-
-		public int getLevel() {
-			return level;
 		}
 
 		/**
@@ -317,7 +301,7 @@ public final class Wifi extends Data {
 			return net.ssid.equals(this.ssid) && net.bssid.equals(this.bssid);
 		}
 
-		public static Network fromString(String string) {
+		static Network fromString(String string) {
 			final Network network = new Network();
 			String[] split = string.split(SEP);
 			network.ssid = split[0].split(IS)[1].trim();
@@ -414,7 +398,6 @@ public final class Wifi extends Data {
 	public static Wifi fromString(String s) {
 		if (s == null || s.trim().equals("")) return null;
 		final Wifi p = new Wifi();
-		p.networks = new ArrayList<Wifi.Network>();
 		String[] split = s.split(N);
 		p.time = Long.valueOf(split[0]);
 		for (int i = 1; i < split.length; ++i) {
