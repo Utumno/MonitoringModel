@@ -4,7 +4,6 @@ import android.content.Context;
 import android.net.wifi.ScanResult;
 
 import gr.uoa.di.monitoring.android.persist.FileStore;
-import gr.uoa.di.monitoring.android.persist.FileStore.Fields;
 import gr.uoa.di.monitoring.android.persist.ParserException;
 import gr.uoa.di.monitoring.android.persist.Persist;
 
@@ -250,31 +249,6 @@ public final class Wifi extends Data {
 		}
 	}
 
-	// TODO move this into base class Data and make it abstract
-	public static List<Wifi> parse(File f) throws IOException, ParserException {
-		final FileInputStream fis = new FileInputStream(f);
-		List<EnumMap<WifiFields, List<List<Byte>>>> entries;
-		try {
-			entries = FileStore.getEntries(fis, WifiFields.class);
-		} finally {
-			try {
-				fis.close();
-			} catch (IOException e) {
-				// could not close the file ?
-				e.printStackTrace();
-			}
-		}
-		final List<Wifi> data = new ArrayList<Wifi>();
-		for (EnumMap<WifiFields, List<List<Byte>>> enumMap : entries) {
-			Wifi bat = new Wifi();
-			for (WifiFields field : enumMap.keySet()) {
-				/* bat = */field.parse(enumMap.get(field), bat);
-			}
-			data.add(bat);
-		}
-		return data;
-	}
-
 	static class Network {
 
 		private static final String SEP = ", ";
@@ -309,13 +283,56 @@ public final class Wifi extends Data {
 		}
 	}
 
-	public static <T extends Enum<T> & Fields<?, ?, ?>> Wifi saveData(
-			Context ctx, List<ScanResult> data, Class<T> fields)
+	// =========================================================================
+	// Static API
+	// =========================================================================
+	public static List<Wifi> parse(File f) throws IOException, ParserException {
+		final FileInputStream fis = new FileInputStream(f);
+		List<EnumMap<WifiFields, List<List<Byte>>>> entries;
+		try {
+			entries = FileStore.getEntries(fis, WifiFields.class);
+		} finally {
+			try {
+				fis.close();
+			} catch (IOException e) {
+				// could not close the file ?
+				e.printStackTrace();
+			}
+		}
+		final List<Wifi> data = new ArrayList<Wifi>();
+		for (EnumMap<WifiFields, List<List<Byte>>> enumMap : entries) {
+			Wifi bat = new Wifi();
+			for (WifiFields field : enumMap.keySet()) {
+				/* bat = */field.parse(enumMap.get(field), bat);
+			}
+			data.add(bat);
+		}
+		return data;
+	}
+
+	/**
+	 * Constructs a Wifi instance from the given string. Only the fields that
+	 * matter to {@link #fairlyEqual(Data)} are filled (and time for debugging
+	 * purposes)
+	 */
+	public static Wifi fromString(String s) {
+		if (s == null || s.trim().equals("")) return null;
+		final Wifi p = new Wifi();
+		String[] split = s.split(N);
+		p.time = Long.valueOf(split[0]);
+		for (int i = 1; i < split.length; ++i) {
+			p.networks.add(Wifi.Network.fromString(split[i]));
+		}
+		return p;
+	}
+
+	public static Wifi saveData(Context ctx, List<ScanResult> data)
 			throws IOException {
 		final Wifi out = new Wifi();
 		List<List<byte[]>> listOfListsOfByteArrays = createListOfListsOfByteArrays(
 			data, out);
-		Persist.saveData(ctx, FILE_PREFIX, listOfListsOfByteArrays, fields);
+		Persist.saveData(ctx, FILE_PREFIX, listOfListsOfByteArrays,
+			WifiFields.class);
 		return out;
 	}
 
@@ -346,6 +363,9 @@ public final class Wifi extends Data {
 		return listofListsOfByteArrays;
 	}
 
+	// =========================================================================
+	// API
+	// =========================================================================
 	@Override
 	public String getFilename() {
 		return FILE_PREFIX;
@@ -370,22 +390,6 @@ public final class Wifi extends Data {
 	}
 
 	/**
-	 * Constructs a Wifi instance from the given string. Only the fields that
-	 * matter to {@link #fairlyEqual(Data)} are filled (and time for debugging
-	 * purposes)
-	 */
-	public static Wifi fromString(String s) {
-		if (s == null || s.trim().equals("")) return null;
-		final Wifi p = new Wifi();
-		String[] split = s.split(N);
-		p.time = Long.valueOf(split[0]);
-		for (int i = 1; i < split.length; ++i) {
-			p.networks.add(Wifi.Network.fromString(split[i]));
-		}
-		return p;
-	}
-
-	/**
 	 * Two Wifi instances are fairlyEqual if they contain the same number of
 	 * fairly equal (ssid and bssid) networks
 	 *
@@ -405,12 +409,5 @@ public final class Wifi extends Data {
 			return false;
 		}
 		return true;
-	}
-
-	// =========================================================================
-	// Accessors
-	// =========================================================================
-	public List<Network> getNetworks() {
-		return new ArrayList<Wifi.Network>(networks);
 	}
 }

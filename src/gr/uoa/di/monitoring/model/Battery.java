@@ -44,6 +44,7 @@ public final class Battery extends Data {
 			@Override
 			public Battery parse(List<Byte> list, Battery bat)
 					throws ParserException {
+				// reset internal Battery instance here ***
 				try {
 					bat.time = listToLong(list);
 				} catch (NumberFormatException e) {
@@ -82,7 +83,10 @@ public final class Battery extends Data {
 		}
 	}
 
-	// TODO move this into base class Data and make it abstract
+	// =========================================================================
+	// Static API
+	// =========================================================================
+	// TODO move this into base class Data and make it generic ***
 	public static List<Battery> parse(File f) throws IOException,
 			ParserException {
 		final FileInputStream fis = new FileInputStream(f);
@@ -99,13 +103,30 @@ public final class Battery extends Data {
 		}
 		final List<Battery> data = new ArrayList<Battery>();
 		for (EnumMap<BatteryFields, List<Byte>> enumMap : entries) {
-			Battery bat = new Battery();
+			Battery bat = new Battery(); // this is what prevents genericity - I
+			// need to reflectively create a new instance - except if it were
+			// created by the Fields somehow and were reset in TIME (***) and
+			// then filled up - awkward
 			for (BatteryFields field : enumMap.keySet()) {
 				/* bat = */field.parse(enumMap.get(field), bat);
 			}
 			data.add(bat);
 		}
 		return data;
+	}
+
+	/**
+	 * Constructs a Battery instance from the given string. Only the fields that
+	 * matter to {@link #fairlyEqual(Data)} are filled (and time for debugging
+	 * purposes)
+	 */
+	public static Battery fromString(String s) {
+		if (s == null || s.trim().equals("")) return null;
+		final Battery b = new Battery();
+		String[] split = s.split(N);
+		b.time = Long.valueOf(split[0]);
+		b.status = split[1].split(IS)[1].trim();
+		return b;
 	}
 
 	public static <T extends Enum<T> & Fields<?, ?, ?>> Battery saveData(
@@ -127,6 +148,9 @@ public final class Battery extends Data {
 		return listByteArrays;
 	}
 
+	// =========================================================================
+	// API
+	// =========================================================================
 	@Override
 	public String getFilename() {
 		return FILE_PREFIX;
@@ -153,26 +177,5 @@ public final class Battery extends Data {
 		if (d == null || !(d instanceof Battery)) return false;
 		final Battery b = (Battery) d;
 		return b.status.equals(this.status); // NPE here
-	}
-
-	/**
-	 * Constructs a Battery instance from the given string. Only the fields that
-	 * matter to {@link #fairlyEqual(Data)} are filled (and time for debugging
-	 * purposes)
-	 */
-	public static Battery fromString(String s) {
-		if (s == null || s.trim().equals("")) return null;
-		final Battery b = new Battery();
-		String[] split = s.split(N);
-		b.time = Long.valueOf(split[0]);
-		b.status = split[1].split(IS)[1].trim();
-		return b;
-	}
-
-	// =========================================================================
-	// Accessors
-	// =========================================================================
-	public String getStatus() {
-		return status;
 	}
 }

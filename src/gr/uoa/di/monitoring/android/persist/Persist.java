@@ -28,7 +28,9 @@ public final class Persist {
 	private static volatile File sRootFolder; // TODO : cache but can lead to
 	// NPEs - ask : enforce access to static fields via getter
 
-	// public
+	// =========================================================================
+	// Public API - called by Model to store data
+	// =========================================================================
 	public static void saveData(Context ctx, String filename,
 			List<byte[]> listByteArrays) throws FileNotFoundException,
 			IOException {
@@ -46,6 +48,9 @@ public final class Persist {
 			fields, listOfListsOfByteArrays);
 	}
 
+	// =========================================================================
+	// Public API - used by Network Service to access stored data and send them
+	// =========================================================================
 	/**
 	 * Checks if there are available data by checking the size of the internal
 	 * directory where the data is saved. If the internal directory does not

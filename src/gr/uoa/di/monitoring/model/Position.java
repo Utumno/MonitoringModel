@@ -128,26 +128,9 @@ public final class Position extends Data {
 		}
 	}
 
-	public static <T extends Enum<T> & Fields<?, ?, ?>> Position saveData(
-			Context ctx, Location data) throws IOException {
-		final Position out = new Position();
-		final List<byte[]> listByteArrays = createListOfByteArrays(data, out);
-		Persist.saveData(ctx, FILE_PREFIX, listByteArrays);
-		return out;
-	}
-
-	private static List<byte[]> createListOfByteArrays(Location data,
-			Position out) {
-		if (out == null)
-			throw new NullPointerException("out parameter can't be null");
-		final List<byte[]> listByteArrays = new ArrayList<byte[]>();
-		for (LocationFields bs : LocationFields.values()) {
-			listByteArrays.add(bs.getData(data, out).get(0));
-		}
-		return listByteArrays;
-	}
-
-	// TODO move this into base class Data and make it abstract
+	// =========================================================================
+	// Static API
+	// =========================================================================
 	public static List<Position> parse(File f) throws IOException,
 			ParserException {
 		final FileInputStream fis = new FileInputStream(f);
@@ -173,6 +156,45 @@ public final class Position extends Data {
 		return data;
 	}
 
+	/**
+	 * Constructs a Position instance from the given string. Only the fields
+	 * that matter to {@link #fairlyEqual(Data)} are filled (and time for
+	 * debugging purposes)
+	 */
+	public static Position fromString(String s) {
+		if (s == null || s.trim().equals("")) return null;
+		final Position p = new Position();
+		String[] split = s.split(N);
+		p.time = Long.valueOf(split[0]);
+		int i = 0;
+		p.longitude = Double.valueOf(split[++i].split(IS)[1].trim());
+		p.latitude = Double.valueOf(split[++i].split(IS)[1].trim());
+		p.provider = split[++i].split(IS)[1].trim();
+		return p;
+	}
+
+	public static <T extends Enum<T> & Fields<?, ?, ?>> Position saveData(
+			Context ctx, Location data) throws IOException {
+		final Position out = new Position();
+		final List<byte[]> listByteArrays = createListOfByteArrays(data, out);
+		Persist.saveData(ctx, FILE_PREFIX, listByteArrays);
+		return out;
+	}
+
+	private static List<byte[]> createListOfByteArrays(Location data,
+			Position out) {
+		if (out == null)
+			throw new NullPointerException("out parameter can't be null");
+		final List<byte[]> listByteArrays = new ArrayList<byte[]>();
+		for (LocationFields bs : LocationFields.values()) {
+			listByteArrays.add(bs.getData(data, out).get(0));
+		}
+		return listByteArrays;
+	}
+
+	// =========================================================================
+	// API
+	// =========================================================================
 	@Override
 	public String getFilename() {
 		return FILE_PREFIX;
@@ -203,37 +225,5 @@ public final class Position extends Data {
 		final Position p = (Position) d;
 		return p.latitude == this.latitude && p.longitude == this.longitude
 			&& p.provider.equals(this.provider);
-	}
-
-	/**
-	 * Constructs a Position instance from the given string. Only the fields
-	 * that matter to {@link #fairlyEqual(Data)} are filled (and time for
-	 * debugging purposes)
-	 */
-	public static Position fromString(String s) {
-		if (s == null || s.trim().equals("")) return null;
-		final Position p = new Position();
-		String[] split = s.split(N);
-		p.time = Long.valueOf(split[0]);
-		int i = 0;
-		p.longitude = Double.valueOf(split[++i].split(IS)[1].trim());
-		p.latitude = Double.valueOf(split[++i].split(IS)[1].trim());
-		p.provider = split[++i].split(IS)[1].trim();
-		return p;
-	}
-
-	// =========================================================================
-	// Accessors
-	// =========================================================================
-	public double getLatitude() {
-		return latitude;
-	}
-
-	public double getLongitude() {
-		return longitude;
-	}
-
-	public String getProvider() {
-		return provider;
 	}
 }

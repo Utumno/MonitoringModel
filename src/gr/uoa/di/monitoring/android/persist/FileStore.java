@@ -62,7 +62,7 @@ public final class FileStore {
 	 *            just the filename not a path
 	 * @return the deviceID
 	 */
-	public static String getDeviceID(String filename) {
+	public static String getDeviceID(final String filename) {
 		// as it is the device ID is the first part of the filename
 		return filename.split(FILENAME_SEPA)[0];
 	}
@@ -81,8 +81,8 @@ public final class FileStore {
 	 * @param <D>
 	 *            the corresponding type of the data in the model, ex. Position
 	 * @param <K>
-	 *            the list that the parser expects ({@code List<Byte>}or
-	 *            {@code List<List<Byte>>}
+	 *            the type of the list that the parser expects (
+	 *            {@code List<Byte>} or {@code List<List<Byte>>})
 	 */
 	public static interface Fields<T, D extends Data, K> {
 
