@@ -40,7 +40,7 @@ public final class Persist {
 	public static <T extends Enum<T> & Fields<?, ?, ?>> void saveData(
 			Context ctx, String filename,
 			List<List<byte[]>> listOfListsOfByteArrays, Class<T> fields)
-			throws FileNotFoundException, IOException {
+			throws IOException {
 		// internal storage
 		persist(dataFileInInternalStorage(getRootFolder(ctx), filename),
 			fields, listOfListsOfByteArrays);
@@ -110,12 +110,10 @@ public final class Persist {
 	 *
 	 * @param file
 	 * @param listByteArrays
-	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
 	private static void persist(final File file,
-			final List<byte[]> listByteArrays) throws FileNotFoundException,
-			IOException {
+			final List<byte[]> listByteArrays) throws IOException {
 		/*
 		 * The bytes contained in each item in the list are persisted in turn
 		 * and are separated by the next chunk of bytes by DELIMITER. The last

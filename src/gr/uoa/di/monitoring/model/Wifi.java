@@ -12,7 +12,6 @@ import org.apache.http.util.EncodingUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -39,10 +38,12 @@ public final class Wifi extends Data {
 		TIME(false) {
 
 			@Override
-			public List<byte[]> getData(List<ScanResult> scanRes) {
+			public List<byte[]> getData(List<ScanResult> scanRes, Wifi out) {
 				List<byte[]> arrayList = new ArrayList<byte[]>();
 				// NB : I just get the time of the method invocation
-				arrayList.add(currentTime());
+				final long currentTimeMillis = System.currentTimeMillis();
+				out.time = currentTimeMillis;
+				arrayList.add(currentTime(currentTimeMillis));
 				return arrayList;
 			}
 
@@ -62,8 +63,9 @@ public final class Wifi extends Data {
 		SSID(true) {
 
 			@Override
-			public List<byte[]> getData(List<ScanResult> scanRes) {
+			public List<byte[]> getData(List<ScanResult> scanRes, Wifi out) {
 				List<byte[]> arrayList = new ArrayList<byte[]>();
+				final List<Network> nets = out.networks;
 				if (scanRes != null) {
 					for (ScanResult loc : scanRes) {
 						// ISSUE 6 - must get the SSID from the service and
@@ -71,7 +73,12 @@ public final class Wifi extends Data {
 						// found I must replace it with a non present char and
 						// add this info on the string byte[]. Also check what
 						// do I do with empty null SSIDs and hidden ones
-						arrayList.add(EncodingUtils.getAsciiBytes(loc.SSID));
+						final String ssid = loc.SSID;
+						// wi.networks FIRST POPULATED HERE !!!!!!!!!!!!!!!!!!!!
+						Network n = new Network();
+						n.ssid = ssid;
+						nets.add(n);
+						arrayList.add(EncodingUtils.getAsciiBytes(ssid));
 					}
 				}
 				return arrayList;
@@ -103,11 +110,15 @@ public final class Wifi extends Data {
 		BSSID(true) {
 
 			@Override
-			public List<byte[]> getData(List<ScanResult> scanRes) {
+			public List<byte[]> getData(List<ScanResult> scanRes, Wifi out) {
 				List<byte[]> arrayList = new ArrayList<byte[]>();
+				final List<Network> nets = out.networks;
 				if (scanRes != null) {
+					int i = 0;
 					for (ScanResult loc : scanRes) {
-						arrayList.add(EncodingUtils.getAsciiBytes(loc.BSSID));
+						final String bssid = loc.BSSID;
+						nets.get(i++).bssid = bssid;
+						arrayList.add(EncodingUtils.getAsciiBytes(bssid));
 					}
 				}
 				return arrayList;
@@ -144,12 +155,15 @@ public final class Wifi extends Data {
 		FREQUENCY(true) {
 
 			@Override
-			public List<byte[]> getData(List<ScanResult> scanRes) {
+			public List<byte[]> getData(List<ScanResult> scanRes, Wifi out) {
 				List<byte[]> arrayList = new ArrayList<byte[]>();
+				final List<Network> nets = out.networks;
 				if (scanRes != null) {
+					int i = 0;
 					for (ScanResult loc : scanRes) {
-						arrayList.add(EncodingUtils.getAsciiBytes(loc.frequency
-							+ ""));
+						final int freq = loc.frequency;
+						nets.get(i++).frequency = freq;
+						arrayList.add(EncodingUtils.getAsciiBytes(freq + ""));
 					}
 				}
 				return arrayList;
@@ -185,12 +199,15 @@ public final class Wifi extends Data {
 		LEVEL(true) {
 
 			@Override
-			public List<byte[]> getData(List<ScanResult> scanRes) {
+			public List<byte[]> getData(List<ScanResult> scanRes, Wifi out) {
 				List<byte[]> arrayList = new ArrayList<byte[]>();
+				final List<Network> nets = out.networks;
 				if (scanRes != null) {
+					int i = 0;
 					for (ScanResult loc : scanRes) {
-						arrayList.add(EncodingUtils.getAsciiBytes(loc.level
-							+ ""));
+						final int lev = loc.level;
+						nets.get(i++).level = lev;
+						arrayList.add(EncodingUtils.getAsciiBytes(lev + ""));
 					}
 				}
 				return arrayList;
@@ -231,31 +248,6 @@ public final class Wifi extends Data {
 		@Override
 		public boolean isList() {
 			return isList;
-		}
-
-		/**
-		 * Extracts from data given by android the bytes representing the data
-		 * we are interested in. The returned List<List<byte[]>> has as many
-		 * elements as the Fields. The elements of this List for the *list*
-		 * fields - those fields that isList() returns true (the properties for
-		 * *each* network) - are List<byte[]> which have as many elements as the
-		 * available networks - one byte[] for each. The non list fields
-		 * (currently TIME) are List<byte[]> with a single byte[] element
-		 * (containing the time as a byte[] in our case)
-		 *
-		 * @param data
-		 *            the list of ScanResult
-		 * @return a List<List<byte[]>> which has as many elements as the Fields
-		 *         each of which has as many elements as the networks scanned
-		 *         for the isList() fields or a single element otherwise
-		 */
-		public static List<List<byte[]>> createListOfListsOfByteArrays(
-				List<ScanResult> data) {
-			final List<List<byte[]>> listofListsOfByteArrays = new ArrayList<List<byte[]>>();
-			for (WifiFields bs : WifiFields.values()) {
-				listofListsOfByteArrays.add(bs.getData(data));
-			}
-			return listofListsOfByteArrays;
 		}
 	}
 
@@ -334,10 +326,41 @@ public final class Wifi extends Data {
 		}
 	}
 
-	public static <T extends Enum<T> & Fields<?, ?, ?>> void saveData(
-			Context ctx, List<List<byte[]>> listOfListsOfByteArrays,
-			Class<T> fields) throws FileNotFoundException, IOException {
+	public static <T extends Enum<T> & Fields<?, ?, ?>> Wifi saveData(
+			Context ctx, List<ScanResult> data, Class<T> fields)
+			throws IOException {
+		final Wifi out = new Wifi();
+		List<List<byte[]>> listOfListsOfByteArrays = createListOfListsOfByteArrays(
+			data, out);
 		Persist.saveData(ctx, FILE_PREFIX, listOfListsOfByteArrays, fields);
+		return out;
+	}
+
+	/**
+	 * Extracts from data given by android the bytes representing the data we
+	 * are interested in. The returned List<List<byte[]>> has as many elements
+	 * as the Fields. The elements of this List for the *list* fields - those
+	 * fields that isList() returns true (the properties for *each* network) -
+	 * are List<byte[]> which have as many elements as the available networks -
+	 * one byte[] for each. The non list fields (currently TIME) are
+	 * List<byte[]> with a single byte[] element (containing the time as a
+	 * byte[] in our case)
+	 *
+	 * @param data
+	 *            the list of ScanResult
+	 * @return a List<List<byte[]>> which has as many elements as the Fields
+	 *         each of which has as many elements as the networks scanned for
+	 *         the isList() fields or a single element otherwise
+	 */
+	private static List<List<byte[]>> createListOfListsOfByteArrays(
+			List<ScanResult> data, Wifi out) {
+		if (out == null)
+			throw new NullPointerException("out parameter can't be null");
+		final List<List<byte[]>> listofListsOfByteArrays = new ArrayList<List<byte[]>>();
+		for (WifiFields bs : WifiFields.values()) {
+			listofListsOfByteArrays.add(bs.getData(data, out));
+		}
+		return listofListsOfByteArrays;
 	}
 
 	@Override

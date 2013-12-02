@@ -88,7 +88,7 @@ public final class FileStore {
 
 		boolean isList();
 
-		List<byte[]> getData(T data);
+		List<byte[]> getData(T data, D output);
 
 		D parse(K list, D objectToModify) throws ParserException;
 	}

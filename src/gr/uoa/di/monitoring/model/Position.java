@@ -12,7 +12,6 @@ import org.apache.http.util.EncodingUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -36,9 +35,11 @@ public final class Position extends Data {
 		TIME {
 
 			@Override
-			public List<byte[]> getData(Location loc) {
+			public List<byte[]> getData(Location loc, Position out) {
 				List<byte[]> arrayList = new ArrayList<byte[]>();
-				arrayList.add(EncodingUtils.getAsciiBytes(loc.getTime() + ""));
+				final long t = loc.getTime();
+				out.time = t;
+				arrayList.add(EncodingUtils.getAsciiBytes(t + ""));
 				return arrayList;
 			}
 
@@ -56,10 +57,11 @@ public final class Position extends Data {
 		LAT {
 
 			@Override
-			public List<byte[]> getData(Location loc) {
+			public List<byte[]> getData(Location loc, Position out) {
 				List<byte[]> arrayList = new ArrayList<byte[]>();
-				arrayList.add(EncodingUtils.getAsciiBytes(loc.getLatitude()
-					+ ""));
+				final double lat = loc.getLatitude();
+				out.latitude = lat;
+				arrayList.add(EncodingUtils.getAsciiBytes(lat + ""));
 				return arrayList;
 			}
 
@@ -77,10 +79,11 @@ public final class Position extends Data {
 		LONG {
 
 			@Override
-			public List<byte[]> getData(Location loc) {
+			public List<byte[]> getData(Location loc, Position out) {
 				List<byte[]> arrayList = new ArrayList<byte[]>();
-				arrayList.add(EncodingUtils.getAsciiBytes(loc.getLongitude()
-					+ ""));
+				final double lon = loc.getLongitude();
+				out.longitude = lon;
+				arrayList.add(EncodingUtils.getAsciiBytes(lon + ""));
 				return arrayList;
 			}
 
@@ -98,10 +101,11 @@ public final class Position extends Data {
 		PROVIDER {
 
 			@Override
-			public List<byte[]> getData(Location loc) {
+			public List<byte[]> getData(Location loc, Position out) {
 				List<byte[]> arrayList = new ArrayList<byte[]>();
-				arrayList.add(EncodingUtils.getAsciiBytes(loc.getProvider()
-					+ ""));
+				final String prov = loc.getProvider();
+				out.provider = prov;
+				arrayList.add(EncodingUtils.getAsciiBytes(prov + ""));
 				return arrayList;
 			}
 
@@ -123,20 +127,25 @@ public final class Position extends Data {
 		public boolean isList() {
 			return false; // no lists here
 		}
-
-		public static List<byte[]> createListOfByteArrays(Location data) {
-			final List<byte[]> listByteArrays = new ArrayList<byte[]>();
-			for (LocationFields bs : LocationFields.values()) {
-				listByteArrays.add(bs.getData(data).get(0));
-			}
-			return listByteArrays;
-		}
 	}
 
-	public static <T extends Enum<T> & Fields<?, ?, ?>> void saveData(
-			Context ctx, List<byte[]> listByteArrays)
-			throws FileNotFoundException, IOException {
+	public static <T extends Enum<T> & Fields<?, ?, ?>> Position saveData(
+			Context ctx, Location data) throws IOException {
+		final Position out = new Position();
+		final List<byte[]> listByteArrays = createListOfByteArrays(data, out);
 		Persist.saveData(ctx, FILE_PREFIX, listByteArrays);
+		return out;
+	}
+
+	private static List<byte[]> createListOfByteArrays(Location data,
+			Position out) {
+		if (out == null)
+			throw new NullPointerException("out parameter can't be null");
+		final List<byte[]> listByteArrays = new ArrayList<byte[]>();
+		for (LocationFields bs : LocationFields.values()) {
+			listByteArrays.add(bs.getData(data, out).get(0));
+		}
+		return listByteArrays;
 	}
 
 	// TODO move this into base class Data and make it abstract

@@ -13,7 +13,6 @@ import org.apache.http.util.EncodingUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -34,10 +33,12 @@ public final class Battery extends Data {
 		TIME {
 
 			@Override
-			public List<byte[]> getData(Intent data) {
+			public List<byte[]> getData(Intent data, Battery out) {
 				List<byte[]> arrayList = new ArrayList<byte[]>();
 				// NB : I just get the time of the method invocation
-				arrayList.add(currentTime());
+				final long currentTimeMillis = System.currentTimeMillis();
+				out.time = currentTimeMillis;
+				arrayList.add(currentTime(currentTimeMillis));
 				return arrayList;
 			}
 
@@ -55,10 +56,12 @@ public final class Battery extends Data {
 		STATUS {
 
 			@Override
-			public List<byte[]> getData(Intent batteryStatus) {
+			public List<byte[]> getData(Intent batteryStatus, Battery out) {
 				List<byte[]> arrayList = new ArrayList<byte[]>();
-				arrayList.add(EncodingUtils.getAsciiBytes(batteryStatus
-					.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) + ""));
+				final String stat = batteryStatus.getIntExtra(
+					BatteryManager.EXTRA_LEVEL, -1) + "";
+				out.status = stat;
+				arrayList.add(EncodingUtils.getAsciiBytes(stat));
 				return arrayList;
 			}
 
@@ -77,14 +80,6 @@ public final class Battery extends Data {
 		@Override
 		public boolean isList() {
 			return false; // no lists here
-		}
-
-		public static List<byte[]> createListOfByteArrays(Intent data) {
-			final List<byte[]> listByteArrays = new ArrayList<byte[]>();
-			for (BatteryFields bs : BatteryFields.values()) {
-				if (!bs.isList()) listByteArrays.add(bs.getData(data).get(0));
-			}
-			return listByteArrays;
 		}
 	}
 
@@ -114,10 +109,23 @@ public final class Battery extends Data {
 		return data;
 	}
 
-	public static <T extends Enum<T> & Fields<?, ?, ?>> void saveData(
-			Context ctx, List<byte[]> listByteArrays)
-			throws FileNotFoundException, IOException {
+	public static <T extends Enum<T> & Fields<?, ?, ?>> Battery saveData(
+			Context ctx, Intent data) throws IOException {
+		final Battery out = new Battery();
+		List<byte[]> listByteArrays = createListOfByteArrays(data, out);
 		Persist.saveData(ctx, FILE_PREFIX, listByteArrays);
+		return out;
+	}
+
+	private static List<byte[]>
+			createListOfByteArrays(Intent data, Battery out) {
+		if (out == null)
+			throw new NullPointerException("out parameter can't be null");
+		final List<byte[]> listByteArrays = new ArrayList<byte[]>();
+		for (BatteryFields bs : BatteryFields.values()) {
+			if (!bs.isList()) listByteArrays.add(bs.getData(data, out).get(0));
+		}
+		return listByteArrays;
 	}
 
 	@Override

@@ -18,15 +18,18 @@ public abstract class Data {
 	public abstract String getFilename();
 
 	/**
-	 * Returns a byte array representation of current time (wraps
-	 * {@link System#currentTimeMillis()}). This is the default time field for a
-	 * Data subclass that does not extract its time from the android provided
-	 * data. Current time means just the moment of the method invocation
+	 * Returns a byte array representation of current time. This is the default
+	 * time field for a Data subclass that does not extract its time from the
+	 * android provided data. Current time will be just the moment of the method
+	 * invocation
+	 *
+	 * @param currentTimeMillis
+	 *            meant to be passed {@link System#currentTimeMillis()}) in
 	 *
 	 * @return a byte[] with current time
 	 */
-	static byte[] currentTime() {
-		return EncodingUtils.getAsciiBytes(System.currentTimeMillis() + "");
+	static byte[] currentTime(long currentTimeMillis) {
+		return EncodingUtils.getAsciiBytes(currentTimeMillis + "");
 	}
 
 	@Override
