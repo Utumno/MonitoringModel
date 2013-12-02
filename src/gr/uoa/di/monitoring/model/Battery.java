@@ -31,7 +31,7 @@ public final class Battery extends Data {
 		TIME {
 
 			@Override
-			public List<byte[]> getData(Intent data, Battery out) {
+			public List<byte[]> getData(Intent data, final Battery out) {
 				List<byte[]> arrayList = new ArrayList<byte[]>();
 				// NB : I just get the time of the method invocation
 				final long currentTimeMillis = System.currentTimeMillis();
@@ -41,7 +41,7 @@ public final class Battery extends Data {
 			}
 
 			@Override
-			public Battery parse(List<Byte> list, Battery bat)
+			public void parse(List<Byte> list, final Battery bat)
 					throws ParserException {
 				// reset internal Battery instance here ***
 				try {
@@ -49,13 +49,13 @@ public final class Battery extends Data {
 				} catch (NumberFormatException e) {
 					throw new ParserException("Malformed file", e);
 				}
-				return bat;
 			}
 		},
 		STATUS {
 
 			@Override
-			public List<byte[]> getData(Intent batteryStatus, Battery out) {
+			public List<byte[]>
+					getData(Intent batteryStatus, final Battery out) {
 				List<byte[]> arrayList = new ArrayList<byte[]>();
 				final String stat = batteryStatus.getIntExtra(
 					BatteryManager.EXTRA_LEVEL, -1) + "";
@@ -65,11 +65,10 @@ public final class Battery extends Data {
 			}
 
 			@Override
-			public Battery parse(List<Byte> list, Battery bat)
+			public void parse(List<Byte> list, final Battery bat)
 					throws ParserException {
 				try {
 					bat.status = listToString(list, FileStore.FILES_ENCODING);
-					return bat;
 				} catch (UnsupportedEncodingException e) {
 					throw new ParserException("Malformed file", e);
 				}
@@ -107,7 +106,7 @@ public final class Battery extends Data {
 			// created by the Fields somehow and were reset in TIME (***) and
 			// then filled up - awkward
 			for (BatteryFields field : enumMap.keySet()) {
-				/* bat = */field.parse(enumMap.get(field), bat);
+				field.parse(enumMap.get(field), bat);
 			}
 			data.add(bat);
 		}
@@ -136,8 +135,8 @@ public final class Battery extends Data {
 		return out;
 	}
 
-	private static List<byte[]>
-			createListOfByteArrays(Intent data, Battery out) {
+	private static List<byte[]> createListOfByteArrays(Intent data,
+			final Battery out) {
 		if (out == null)
 			throw new NullPointerException("out parameter can't be null");
 		final List<byte[]> listByteArrays = new ArrayList<byte[]>();

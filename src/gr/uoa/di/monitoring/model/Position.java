@@ -33,7 +33,7 @@ public final class Position extends Data {
 		TIME {
 
 			@Override
-			public List<byte[]> getData(Location loc, Position out) {
+			public List<byte[]> getData(Location loc, final Position out) {
 				List<byte[]> arrayList = new ArrayList<byte[]>();
 				final long t = loc.getTime();
 				out.time = t;
@@ -42,20 +42,19 @@ public final class Position extends Data {
 			}
 
 			@Override
-			public Position parse(List<Byte> list, Position pos)
+			public void parse(List<Byte> list, final Position pos)
 					throws ParserException {
 				try {
 					pos.time = listToLong(list);
 				} catch (NumberFormatException e) {
 					throw new ParserException("Malformed file", e);
 				}
-				return pos;
 			}
 		},
 		LAT {
 
 			@Override
-			public List<byte[]> getData(Location loc, Position out) {
+			public List<byte[]> getData(Location loc, final Position out) {
 				List<byte[]> arrayList = new ArrayList<byte[]>();
 				final double lat = loc.getLatitude();
 				out.latitude = lat;
@@ -64,20 +63,19 @@ public final class Position extends Data {
 			}
 
 			@Override
-			public Position parse(List<Byte> list, Position pos)
+			public void parse(List<Byte> list, final Position pos)
 					throws ParserException {
 				try {
 					pos.latitude = listToDouble(list);
 				} catch (NumberFormatException e) {
 					throw new ParserException("Malformed file", e);
 				}
-				return pos;
 			}
 		},
 		LONG {
 
 			@Override
-			public List<byte[]> getData(Location loc, Position out) {
+			public List<byte[]> getData(Location loc, final Position out) {
 				List<byte[]> arrayList = new ArrayList<byte[]>();
 				final double lon = loc.getLongitude();
 				out.longitude = lon;
@@ -86,20 +84,19 @@ public final class Position extends Data {
 			}
 
 			@Override
-			public Position parse(List<Byte> list, Position pos)
+			public void parse(List<Byte> list, final Position pos)
 					throws ParserException {
 				try {
 					pos.longitude = listToDouble(list);
 				} catch (NumberFormatException e) {
 					throw new ParserException("Malformed file", e);
 				}
-				return pos;
 			}
 		},
 		PROVIDER {
 
 			@Override
-			public List<byte[]> getData(Location loc, Position out) {
+			public List<byte[]> getData(Location loc, final Position out) {
 				List<byte[]> arrayList = new ArrayList<byte[]>();
 				final String prov = loc.getProvider();
 				out.provider = prov;
@@ -108,7 +105,7 @@ public final class Position extends Data {
 			}
 
 			@Override
-			public Position parse(List<Byte> list, Position pos)
+			public void parse(List<Byte> list, final Position pos)
 					throws ParserException {
 				try {
 					pos.provider = listToString(list, FileStore.FILES_ENCODING);
@@ -117,7 +114,6 @@ public final class Position extends Data {
 				} catch (UnsupportedEncodingException e) {
 					throw new ParserException("Malformed file", e);
 				}
-				return pos;
 			}
 		};
 
@@ -148,7 +144,7 @@ public final class Position extends Data {
 		for (EnumMap<LocationFields, List<Byte>> enumMap : entries) {
 			Position bat = new Position();
 			for (LocationFields field : enumMap.keySet()) {
-				/* bat = */field.parse(enumMap.get(field), bat);
+				field.parse(enumMap.get(field), bat);
 			}
 			data.add(bat);
 		}
@@ -181,7 +177,7 @@ public final class Position extends Data {
 	}
 
 	private static List<byte[]> createListOfByteArrays(Location data,
-			Position out) {
+			final Position out) {
 		if (out == null)
 			throw new NullPointerException("out parameter can't be null");
 		final List<byte[]> listByteArrays = new ArrayList<byte[]>();

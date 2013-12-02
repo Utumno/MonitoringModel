@@ -36,7 +36,8 @@ public final class Wifi extends Data {
 		TIME(false) {
 
 			@Override
-			public List<byte[]> getData(List<ScanResult> scanRes, Wifi out) {
+			public List<byte[]>
+					getData(List<ScanResult> scanRes, final Wifi out) {
 				List<byte[]> arrayList = new ArrayList<byte[]>();
 				// NB : I just get the time of the method invocation
 				final long currentTimeMillis = System.currentTimeMillis();
@@ -46,7 +47,7 @@ public final class Wifi extends Data {
 			}
 
 			@Override
-			public Wifi parse(List<List<Byte>> list, Wifi wi)
+			public void parse(List<List<Byte>> list, final Wifi wi)
 					throws ParserException {
 				try {
 					// yeah when the Field has lists all List<T> are
@@ -55,13 +56,13 @@ public final class Wifi extends Data {
 				} catch (NumberFormatException e) {
 					throw new ParserException("Malformed file", e);
 				}
-				return wi;
 			}
 		},
 		SSID(true) {
 
 			@Override
-			public List<byte[]> getData(List<ScanResult> scanRes, Wifi out) {
+			public List<byte[]>
+					getData(List<ScanResult> scanRes, final Wifi out) {
 				List<byte[]> arrayList = new ArrayList<byte[]>();
 				final List<Network> nets = out.networks;
 				if (scanRes != null) {
@@ -83,7 +84,7 @@ public final class Wifi extends Data {
 			}
 
 			@Override
-			public Wifi parse(List<List<Byte>> list, Wifi wi)
+			public void parse(List<List<Byte>> list, final Wifi wi)
 					throws ParserException {
 				// wi.networks FIRST POPULATED HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!
 				final List<Network> nets = wi.networks;
@@ -102,13 +103,13 @@ public final class Wifi extends Data {
 				} catch (UnsupportedEncodingException e) {
 					throw new ParserException("Malformed file", e);
 				}
-				return wi;
 			}
 		},
 		BSSID(true) {
 
 			@Override
-			public List<byte[]> getData(List<ScanResult> scanRes, Wifi out) {
+			public List<byte[]>
+					getData(List<ScanResult> scanRes, final Wifi out) {
 				List<byte[]> arrayList = new ArrayList<byte[]>();
 				final List<Network> nets = out.networks;
 				if (scanRes != null) {
@@ -123,7 +124,7 @@ public final class Wifi extends Data {
 			}
 
 			@Override
-			public Wifi parse(List<List<Byte>> list, Wifi wi)
+			public void parse(List<List<Byte>> list, final Wifi wi)
 					throws ParserException {
 				final List<Network> nets = wi.networks;
 				try {
@@ -147,13 +148,13 @@ public final class Wifi extends Data {
 					throw new ParserException(
 						"Malformed file : extra BSSIDs with no SSID", e);
 				}
-				return wi;
 			}
 		},
 		FREQUENCY(true) {
 
 			@Override
-			public List<byte[]> getData(List<ScanResult> scanRes, Wifi out) {
+			public List<byte[]>
+					getData(List<ScanResult> scanRes, final Wifi out) {
 				List<byte[]> arrayList = new ArrayList<byte[]>();
 				final List<Network> nets = out.networks;
 				if (scanRes != null) {
@@ -168,7 +169,7 @@ public final class Wifi extends Data {
 			}
 
 			@Override
-			public Wifi parse(List<List<Byte>> list, Wifi wi)
+			public void parse(List<List<Byte>> list, final Wifi wi)
 					throws ParserException {
 				final List<Network> nets = wi.networks;
 				try {
@@ -191,13 +192,13 @@ public final class Wifi extends Data {
 						"Malformed file : extra frequencies with no "
 							+ "frequencies", e);
 				}
-				return wi;
 			}
 		},
 		LEVEL(true) {
 
 			@Override
-			public List<byte[]> getData(List<ScanResult> scanRes, Wifi out) {
+			public List<byte[]>
+					getData(List<ScanResult> scanRes, final Wifi out) {
 				List<byte[]> arrayList = new ArrayList<byte[]>();
 				final List<Network> nets = out.networks;
 				if (scanRes != null) {
@@ -212,7 +213,7 @@ public final class Wifi extends Data {
 			}
 
 			@Override
-			public Wifi parse(List<List<Byte>> list, Wifi wi)
+			public void parse(List<List<Byte>> list, final Wifi wi)
 					throws ParserException {
 				final List<Network> nets = wi.networks;
 				try {
@@ -233,7 +234,6 @@ public final class Wifi extends Data {
 					throw new ParserException(
 						"Malformed file : extra level with no SSIDs", e);
 				}
-				return wi;
 			}
 		};
 
@@ -303,7 +303,7 @@ public final class Wifi extends Data {
 		for (EnumMap<WifiFields, List<List<Byte>>> enumMap : entries) {
 			Wifi bat = new Wifi();
 			for (WifiFields field : enumMap.keySet()) {
-				/* bat = */field.parse(enumMap.get(field), bat);
+				field.parse(enumMap.get(field), bat);
 			}
 			data.add(bat);
 		}
@@ -353,7 +353,7 @@ public final class Wifi extends Data {
 	 *         the isList() fields or a single element otherwise
 	 */
 	private static List<List<byte[]>> createListOfListsOfByteArrays(
-			List<ScanResult> data, Wifi out) {
+			List<ScanResult> data, final Wifi out) {
 		if (out == null)
 			throw new NullPointerException("out parameter can't be null");
 		final List<List<byte[]>> listofListsOfByteArrays = new ArrayList<List<byte[]>>();
