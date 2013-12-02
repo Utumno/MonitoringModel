@@ -3,6 +3,7 @@ package gr.uoa.di.monitoring.android.persist;
 import gr.uoa.di.java.helpers.Utils;
 import gr.uoa.di.monitoring.model.Battery;
 import gr.uoa.di.monitoring.model.Data;
+import gr.uoa.di.monitoring.model.Fields;
 import gr.uoa.di.monitoring.model.Position;
 import gr.uoa.di.monitoring.model.Wifi;
 
@@ -65,32 +66,6 @@ public final class FileStore {
 	public static String getDeviceID(final String filename) {
 		// as it is the device ID is the first part of the filename
 		return filename.split(FILENAME_SEPA)[0];
-	}
-
-	// =========================================================================
-	// Fields
-	// =========================================================================
-	/**
-	 * Interface meant to be implemented by enums that encapsulate in their
-	 * constants the methods to get the Data needed from android objects and
-	 * parse the Lists of bytes from those serialized in the files sent to the
-	 * servers
-	 *
-	 * @param <T>
-	 *            the type of the data provided by android, ex. Location
-	 * @param <D>
-	 *            the corresponding type of the data in the model, ex. Position
-	 * @param <K>
-	 *            the type of the list that the parser expects (
-	 *            {@code List<Byte>} or {@code List<List<Byte>>})
-	 */
-	public static interface Fields<T, D extends Data, K> {
-
-		boolean isList();
-
-		List<byte[]> getData(T data, D output);
-
-		D parse(K list, D objectToModify) throws ParserException;
 	}
 
 	// =========================================================================

@@ -6,7 +6,7 @@ import gr.uoa.di.android.helpers.DeviceIdentifier;
 import gr.uoa.di.android.helpers.DeviceIdentifier.DeviceIDException;
 import gr.uoa.di.android.helpers.FileIO;
 import gr.uoa.di.java.helpers.Zip.CompressException;
-import gr.uoa.di.monitoring.android.persist.FileStore.Fields;
+import gr.uoa.di.monitoring.model.Fields;
 
 import java.io.File;
 import java.io.FileNotFoundException;

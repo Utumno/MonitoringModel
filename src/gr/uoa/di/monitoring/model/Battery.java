@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.BatteryManager;
 
 import gr.uoa.di.monitoring.android.persist.FileStore;
-import gr.uoa.di.monitoring.android.persist.FileStore.Fields;
 import gr.uoa.di.monitoring.android.persist.ParserException;
 import gr.uoa.di.monitoring.android.persist.Persist;
 

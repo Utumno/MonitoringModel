@@ -26,7 +26,7 @@ public final class Wifi extends Data {
 	private static final String FILE_PREFIX = "wifi";
 
 	public static enum WifiFields implements
-			FileStore.Fields<List<ScanResult>, Wifi, List<List<Byte>>> {
+			Fields<List<ScanResult>, Wifi, List<List<Byte>>> {
 		/*
 		 * getData takes a List<ScanResult> and produces a List<byte[]>. For
 		 * TIME the List<byte[]> gas a single element byte[] - the time in
