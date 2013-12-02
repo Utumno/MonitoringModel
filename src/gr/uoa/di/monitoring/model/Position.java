@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 
-import static gr.uoa.di.java.helpers.Utils.listFromArray;
 import static gr.uoa.di.java.helpers.Utils.listToDouble;
 import static gr.uoa.di.java.helpers.Utils.listToLong;
 import static gr.uoa.di.java.helpers.Utils.listToString;
@@ -189,15 +188,6 @@ public final class Position extends Data {
 	public String stringForm() {
 		return time + N + "Longitude" + IS + longitude + N + "Latitude" + IS
 			+ latitude + N + "Provider" + IS + provider;
-	}
-
-	public static Position fromBytes(List<byte[]> lb) throws ParserException {
-		Position battery = new Position();
-		int i = 0;
-		for (LocationFields bf : LocationFields.values()) {
-			bf.parse(listFromArray(lb.get(i++)), battery);
-		}
-		return battery;
 	}
 
 	/**

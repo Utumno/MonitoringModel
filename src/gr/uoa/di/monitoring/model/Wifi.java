@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 
-import static gr.uoa.di.java.helpers.Utils.listFromArray;
 import static gr.uoa.di.java.helpers.Utils.listToLong;
 import static gr.uoa.di.java.helpers.Utils.listToString;
 
@@ -368,26 +367,6 @@ public final class Wifi extends Data {
 			sb.append(net).append(N);
 		}
 		return time + N + sb.toString();
-	}
-
-	public static Wifi fromBytes(List<List<byte[]>> llb) throws ParserException {
-		Wifi wifi = new Wifi();
-		int nextListOfArrays = 0;
-		for (WifiFields bf : WifiFields.values()) {
-			if (!bf.isList()) {
-				final ArrayList<List<Byte>> al = new ArrayList<List<Byte>>();
-				al.add(listFromArray(llb.get(nextListOfArrays++).get(0)));
-				bf.parse(al, wifi);
-			} else {
-				final ArrayList<List<Byte>> al = new ArrayList<List<Byte>>();
-				final List<byte[]> list = llb.get(nextListOfArrays++);
-				for (byte[] bs : list) {
-					al.add(listFromArray(bs));
-				}
-				bf.parse(al, wifi);
-			}
-		}
-		return wifi;
 	}
 
 	/**
