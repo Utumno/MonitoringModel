@@ -88,7 +88,8 @@ public final class Battery extends Data {
 	// TODO move this into base class Data and make it generic ***
 	public static List<Battery> parse(File f) throws IOException,
 			ParserException {
-		final FileInputStream fis = new FileInputStream(f);
+		final File file = new File(f, FILE_PREFIX);
+		final FileInputStream fis = new FileInputStream(file);
 		List<EnumMap<BatteryFields, List<Byte>>> entries;
 		try {
 			entries = FileStore.getEntries(fis, BatteryFields.class);
@@ -150,11 +151,6 @@ public final class Battery extends Data {
 	// =========================================================================
 	// API
 	// =========================================================================
-	@Override
-	public String getFilename() {
-		return FILE_PREFIX;
-	}
-
 	@Override
 	public String toString() {
 		return super.toString() + N + "Status" + IS + status;

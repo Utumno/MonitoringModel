@@ -288,7 +288,8 @@ public final class Wifi extends Data {
 	// Static API
 	// =========================================================================
 	public static List<Wifi> parse(File f) throws IOException, ParserException {
-		final FileInputStream fis = new FileInputStream(f);
+		final File file = new File(f, FILE_PREFIX);
+		final FileInputStream fis = new FileInputStream(file);
 		List<EnumMap<WifiFields, List<List<Byte>>>> entries;
 		try {
 			entries = FileStore.getEntries(fis, WifiFields.class);
@@ -367,11 +368,6 @@ public final class Wifi extends Data {
 	// =========================================================================
 	// API
 	// =========================================================================
-	@Override
-	public String getFilename() {
-		return FILE_PREFIX;
-	}
-
 	@Override
 	public String toString() {
 		final StringBuilder sb = new StringBuilder();

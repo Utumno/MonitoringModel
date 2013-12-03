@@ -129,7 +129,8 @@ public final class Position extends Data {
 	// =========================================================================
 	public static List<Position> parse(File f) throws IOException,
 			ParserException {
-		final FileInputStream fis = new FileInputStream(f);
+		final File file = new File(f, FILE_PREFIX);
+		final FileInputStream fis = new FileInputStream(file);
 		List<EnumMap<LocationFields, List<Byte>>> entries;
 		try {
 			entries = FileStore.getEntries(fis, LocationFields.class);
@@ -191,11 +192,6 @@ public final class Position extends Data {
 	// =========================================================================
 	// API
 	// =========================================================================
-	@Override
-	public String getFilename() {
-		return FILE_PREFIX;
-	}
-
 	@Override
 	public String toString() {
 		return super.toString() + N + "Longitude" + IS + longitude + N

@@ -14,13 +14,6 @@ public abstract class Data {
 	// API
 	// =========================================================================
 	/**
-	 * Returns the filename the data are saved in for each Data subclass
-	 *
-	 * @return the filename the data are saved in
-	 */
-	public abstract String getFilename();
-
-	/**
 	 * Compares two data instances to see if they are fairly equal. Fairly equal
 	 * is defined in individual types. It checks equality of some basic
 	 * attributes
