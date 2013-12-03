@@ -1,6 +1,5 @@
 package gr.uoa.di.monitoring.android.persist;
 
-import gr.uoa.di.java.helpers.Utils;
 import gr.uoa.di.monitoring.model.Battery;
 import gr.uoa.di.monitoring.model.Data;
 import gr.uoa.di.monitoring.model.Fields;
@@ -22,22 +21,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import static gr.uoa.di.monitoring.android.persist.Store.ARRAY_DELIMITER;
+import static gr.uoa.di.monitoring.android.persist.Store.DELIMITER;
+import static gr.uoa.di.monitoring.android.persist.Store.FILENAME_SEPA;
+import static gr.uoa.di.monitoring.android.persist.Store.NEWLINE;
+
 public final class FileStore {
 
 	private FileStore() {}
 
-	static final String FILENAME_SEPA = "_";
-	// ISSUE 6 : only the SSIDs can contain it - I must provide for it
-	static final byte DELIMITER = 0;
-	static final byte ARRAY_DELIMITER = 1;
-	static final byte NEWLINE = '\n';
 	private static final int INPUT_STREAM_BUFFER_SIZE = 8192; // vanilla default
-	/**
-	 * The parsers need to create strings from the files they parse - this field
-	 * specifies the expected encoding of the files. Should be used by monitors
-	 * whenever they write text files also TODO
-	 */
-	public static final String FILES_ENCODING = Utils.UTF8;
 	/**
 	 * Data Class + filename - would be great if overriding of static methods
 	 * were permitted plus one could access them as Battery.getFilename()

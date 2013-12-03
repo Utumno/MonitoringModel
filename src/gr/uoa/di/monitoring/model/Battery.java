@@ -7,6 +7,7 @@ import android.os.BatteryManager;
 import gr.uoa.di.monitoring.android.persist.FileStore;
 import gr.uoa.di.monitoring.android.persist.ParserException;
 import gr.uoa.di.monitoring.android.persist.Persist;
+import gr.uoa.di.monitoring.android.persist.Store;
 
 import org.apache.http.util.EncodingUtils;
 
@@ -68,7 +69,7 @@ public final class Battery extends Data {
 			public void parse(List<Byte> list, final Battery bat)
 					throws ParserException {
 				try {
-					bat.status = listToString(list, FileStore.FILES_ENCODING);
+					bat.status = listToString(list, Store.FILES_ENCODING);
 				} catch (UnsupportedEncodingException e) {
 					throw new ParserException("Malformed file", e);
 				}

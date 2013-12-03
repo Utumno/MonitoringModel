@@ -13,10 +13,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 
-import static gr.uoa.di.monitoring.android.persist.FileStore.ARRAY_DELIMITER;
-import static gr.uoa.di.monitoring.android.persist.FileStore.DELIMITER;
-import static gr.uoa.di.monitoring.android.persist.FileStore.FILENAME_SEPA;
-import static gr.uoa.di.monitoring.android.persist.FileStore.NEWLINE;
+import static gr.uoa.di.monitoring.android.persist.Store.ARRAY_DELIMITER;
+import static gr.uoa.di.monitoring.android.persist.Store.DELIMITER;
+import static gr.uoa.di.monitoring.android.persist.Store.FILENAME_SEPA;
+import static gr.uoa.di.monitoring.android.persist.Store.NEWLINE;
 
 public final class Persist {
 

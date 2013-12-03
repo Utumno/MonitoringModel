@@ -6,6 +6,7 @@ import android.net.wifi.ScanResult;
 import gr.uoa.di.monitoring.android.persist.FileStore;
 import gr.uoa.di.monitoring.android.persist.ParserException;
 import gr.uoa.di.monitoring.android.persist.Persist;
+import gr.uoa.di.monitoring.android.persist.Store;
 
 import org.apache.http.util.EncodingUtils;
 
@@ -90,7 +91,7 @@ public final class Wifi extends Data {
 				final List<Network> nets = wi.networks;
 				try {
 					for (List<Byte> lb : list) {
-						String ssid = listToString(lb, FileStore.FILES_ENCODING);
+						String ssid = listToString(lb, Store.FILES_ENCODING);
 						// ISSUE 6 - here I must parse the extra info to see if
 						// the SSID I got is unicode or has "exotic" (non
 						// printable) characters
@@ -132,7 +133,7 @@ public final class Wifi extends Data {
 						int i = 0;
 						for (List<Byte> lb : list) {
 							String bssid = listToString(lb,
-								FileStore.FILES_ENCODING);
+								Store.FILES_ENCODING);
 							Network n = nets.get(i++);
 							n.bssid = bssid;
 						}

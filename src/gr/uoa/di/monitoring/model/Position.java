@@ -6,6 +6,7 @@ import android.location.Location;
 import gr.uoa.di.monitoring.android.persist.FileStore;
 import gr.uoa.di.monitoring.android.persist.ParserException;
 import gr.uoa.di.monitoring.android.persist.Persist;
+import gr.uoa.di.monitoring.android.persist.Store;
 
 import org.apache.http.util.EncodingUtils;
 
@@ -108,7 +109,7 @@ public final class Position extends Data {
 			public void parse(List<Byte> list, final Position pos)
 					throws ParserException {
 				try {
-					pos.provider = listToString(list, FileStore.FILES_ENCODING);
+					pos.provider = listToString(list, Store.FILES_ENCODING);
 				} catch (NumberFormatException e) {
 					throw new ParserException("Malformed file", e);
 				} catch (UnsupportedEncodingException e) {
