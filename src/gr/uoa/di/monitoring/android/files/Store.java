@@ -1,4 +1,4 @@
-package gr.uoa.di.monitoring.android.persist;
+package gr.uoa.di.monitoring.android.files;
 
 import gr.uoa.di.java.helpers.Utils;
 

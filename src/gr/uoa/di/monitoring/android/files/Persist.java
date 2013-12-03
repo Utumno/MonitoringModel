@@ -1,4 +1,4 @@
-package gr.uoa.di.monitoring.android.persist;
+package gr.uoa.di.monitoring.android.files;
 
 import android.content.Context;
 
@@ -13,10 +13,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 
-import static gr.uoa.di.monitoring.android.persist.Store.ARRAY_DELIMITER;
-import static gr.uoa.di.monitoring.android.persist.Store.DELIMITER;
-import static gr.uoa.di.monitoring.android.persist.Store.FILENAME_SEPA;
-import static gr.uoa.di.monitoring.android.persist.Store.NEWLINE;
+import static gr.uoa.di.monitoring.android.files.Store.ARRAY_DELIMITER;
+import static gr.uoa.di.monitoring.android.files.Store.DELIMITER;
+import static gr.uoa.di.monitoring.android.files.Store.FILENAME_SEPA;
+import static gr.uoa.di.monitoring.android.files.Store.NEWLINE;
 
 public final class Persist {
 
@@ -203,7 +203,7 @@ public final class Persist {
 			throws IOException {
 		File result = sRootFolder;
 		if (result == null) {
-			synchronized (FileStore.class) {
+			synchronized (Parser.class) {
 				result = sRootFolder;
 				if (result == null) {
 					String rootFoldername;

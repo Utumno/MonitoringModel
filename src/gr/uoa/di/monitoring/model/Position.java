@@ -3,10 +3,10 @@ package gr.uoa.di.monitoring.model;
 import android.content.Context;
 import android.location.Location;
 
-import gr.uoa.di.monitoring.android.persist.FileStore;
-import gr.uoa.di.monitoring.android.persist.ParserException;
-import gr.uoa.di.monitoring.android.persist.Persist;
-import gr.uoa.di.monitoring.android.persist.Store;
+import gr.uoa.di.monitoring.android.files.Parser;
+import gr.uoa.di.monitoring.android.files.ParserException;
+import gr.uoa.di.monitoring.android.files.Persist;
+import gr.uoa.di.monitoring.android.files.Store;
 
 import org.apache.http.util.EncodingUtils;
 
@@ -133,7 +133,7 @@ public final class Position extends Data {
 		final FileInputStream fis = new FileInputStream(file);
 		List<EnumMap<LocationFields, List<Byte>>> entries;
 		try {
-			entries = FileStore.getEntries(fis, LocationFields.class);
+			entries = Parser.getEntries(fis, LocationFields.class);
 		} finally {
 			try {
 				fis.close();

@@ -1,6 +1,6 @@
 package gr.uoa.di.monitoring.model;
 
-import gr.uoa.di.monitoring.android.persist.ParserException;
+import gr.uoa.di.monitoring.android.files.ParserException;
 
 import java.util.List;
 

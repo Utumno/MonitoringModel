@@ -4,10 +4,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.BatteryManager;
 
-import gr.uoa.di.monitoring.android.persist.FileStore;
-import gr.uoa.di.monitoring.android.persist.ParserException;
-import gr.uoa.di.monitoring.android.persist.Persist;
-import gr.uoa.di.monitoring.android.persist.Store;
+import gr.uoa.di.monitoring.android.files.Parser;
+import gr.uoa.di.monitoring.android.files.ParserException;
+import gr.uoa.di.monitoring.android.files.Persist;
+import gr.uoa.di.monitoring.android.files.Store;
 
 import org.apache.http.util.EncodingUtils;
 
@@ -92,7 +92,7 @@ public final class Battery extends Data {
 		final FileInputStream fis = new FileInputStream(file);
 		List<EnumMap<BatteryFields, List<Byte>>> entries;
 		try {
-			entries = FileStore.getEntries(fis, BatteryFields.class);
+			entries = Parser.getEntries(fis, BatteryFields.class);
 		} finally {
 			try {
 				fis.close();

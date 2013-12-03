@@ -1,4 +1,4 @@
-package gr.uoa.di.monitoring.android.persist;
+package gr.uoa.di.monitoring.android.files;
 
 import gr.uoa.di.monitoring.model.Battery;
 import gr.uoa.di.monitoring.model.Data;
@@ -20,14 +20,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static gr.uoa.di.monitoring.android.persist.Store.ARRAY_DELIMITER;
-import static gr.uoa.di.monitoring.android.persist.Store.DELIMITER;
-import static gr.uoa.di.monitoring.android.persist.Store.FILENAME_SEPA;
-import static gr.uoa.di.monitoring.android.persist.Store.NEWLINE;
+import static gr.uoa.di.monitoring.android.files.Store.ARRAY_DELIMITER;
+import static gr.uoa.di.monitoring.android.files.Store.DELIMITER;
+import static gr.uoa.di.monitoring.android.files.Store.FILENAME_SEPA;
+import static gr.uoa.di.monitoring.android.files.Store.NEWLINE;
 
-public final class FileStore {
+public final class Parser {
 
-	private FileStore() {}
+	private Parser() {}
 
 	private static final int INPUT_STREAM_BUFFER_SIZE = 8192; // vanilla default
 	/**

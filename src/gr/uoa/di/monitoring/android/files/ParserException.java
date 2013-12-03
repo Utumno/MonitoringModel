@@ -1,4 +1,4 @@
-package gr.uoa.di.monitoring.android.persist;
+package gr.uoa.di.monitoring.android.files;
 
 public final class ParserException extends Exception {
 
