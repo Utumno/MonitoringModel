@@ -33,7 +33,7 @@ public interface Fields<T, D extends Data, K> {
 	 * Accepts an android object and extracts its data as a List of byte[] while
 	 * populating the relevant field of the Data instance passed as its second
 	 * argument. If the field is not a list ({@link #isList()} returns false the
-	 * returned list will contain a single item.
+	 * returned list will contain a single byte[].
 	 *
 	 * @param data
 	 *            an android object to extract our values from

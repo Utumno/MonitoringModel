@@ -49,7 +49,7 @@ public final class Persist {
 	}
 
 	// =========================================================================
-	// Public API - used by Network Service to access stored data and send them
+	// Public API - used by Network Service to access stored data
 	// =========================================================================
 	/**
 	 * Checks if there are available data by checking the size of the internal
@@ -69,22 +69,30 @@ public final class Persist {
 	}
 
 	/**
-	 * Returns a list of application files in the internal directory where the
-	 * data is saved. If the internal directory does not exist this method will
-	 * try to create it
+	 * Deletes the files stored in the internal application directory.
 	 *
 	 * @param ctx
 	 *            needed to retrieve the internal directory
-	 * @return true if the directory exists and is not empty, false otherwise
-	 * @throws IOException
-	 *             if the internal directory can't be created
+	 * @return true if the files were successfully deleted, false if any one of
+	 *         them failed to delete or if the directory does not exist and we
+	 *         failed to create it
 	 */
-	public static List<File> internalFiles(Context ctx) throws IOException {
-		return FileIO.listFiles(getRootFolder(ctx));
+	public static boolean deleteInternalFiles(Context ctx) {
+		boolean deleted = true;
+		try {
+			for (File f : FileIO.listFiles(Persist.getRootFolder(ctx))) {
+				deleted &= FileIO.delete(f);
+			}
+		} catch (IOException e) {
+			// the directory does not exist and getRootFolder() failed to create
+			// it
+			return false;
+		}
+		return deleted;
 	}
 
 	/**
-	 * Returns a zip file containing the internal folder with the data files
+	 * Returns a zip file containing the internal folder with the data files.
 	 *
 	 * @param ctx
 	 *            Context needed to access the internal storage
@@ -226,13 +234,13 @@ public final class Persist {
 	 * Creates the filename for the zip to send to the server. For now it is in
 	 * the format imei_currentTimeMillis
 	 *
-	 * @param rootPath
+	 * @param rootDir
 	 *            the root folder the data are saved - the device ID (imei) -
 	 *            just the folder name not a path
 	 * @return the filename
 	 */
-	private static String filename(String rootPath) {
-		return rootPath + FILENAME_SEPA + System.currentTimeMillis();
+	private static String filename(String rootDir) {
+		return rootDir + FILENAME_SEPA + System.currentTimeMillis();
 	}
 
 	/**
@@ -247,10 +255,10 @@ public final class Persist {
 	private static File dataFileInInternalStorage(File internalDir,
 			String filename) throws IOException {
 		// File internalDir = FileIO.createDirInternal(ctx, sRootFolder);
-		if (internalDir.exists() && internalDir.isDirectory())
-			return new File(internalDir, filename);
+		if (internalDir.isDirectory()) return new File(internalDir, filename);
 		throw new IOException(internalDir.getAbsolutePath()
-			+ " does not exist or is not a directory.");
+			+ ((internalDir.exists()) ? " is not a directory."
+					: " does not exist."));
 	}
 
 	// helpers

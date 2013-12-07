@@ -30,7 +30,7 @@ public final class Wifi extends Data {
 			Fields<List<ScanResult>, Wifi, List<List<Byte>>> {
 		/*
 		 * getData takes a List<ScanResult> and produces a List<byte[]>. For
-		 * TIME the List<byte[]> gas a single element byte[] - the time in
+		 * TIME the List<byte[]> has a single element byte[] - the time in
 		 * bytes. For the rest of Fields those are lists of byte[] and each
 		 * byte[] is the respective network property for each network
 		 */
@@ -252,11 +252,11 @@ public final class Wifi extends Data {
 
 	static class Network {
 
-		private static final String SEP = ", ";
 		String ssid;
 		String bssid;
 		int frequency;
 		int level;
+		private static final String SEP = ", ";
 
 		@Override
 		public String toString() {
