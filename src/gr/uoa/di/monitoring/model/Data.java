@@ -4,6 +4,11 @@ import org.apache.http.util.EncodingUtils;
 
 import java.util.Date;
 
+/**
+ * Base class for the Data classes. Those must be implemented so as to be
+ * effectively immutable - meaning that once instances are safely published they
+ * should be thread safe. No mutators or public constructors should be provided.
+ */
 public abstract class Data {
 
 	long time; // the subclasses set this

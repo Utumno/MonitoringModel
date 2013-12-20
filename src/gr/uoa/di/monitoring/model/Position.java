@@ -29,7 +29,9 @@ public final class Position extends Data {
 	String provider;
 	private static final String FILE_PREFIX = "loc";
 
-	public static enum LocationFields implements
+	private Position() {}
+
+	private enum LocationFields implements
 			Fields<Location, Position, List<Byte>> {
 		TIME {
 
@@ -154,9 +156,8 @@ public final class Position extends Data {
 	}
 
 	/**
-	 * Constructs a Position instance from the given string. Only the fields
-	 * that matter to {@link #fairlyEqual(Data)} are filled (and time for
-	 * debugging purposes)
+	 * Constructs a Position instance from the given string. This one constructs
+	 * a complete Position instance
 	 */
 	public static Position fromString(String s) {
 		if (s == null || s.trim().equals("")) return null;
@@ -170,8 +171,8 @@ public final class Position extends Data {
 		return p;
 	}
 
-	public static <T extends Enum<T> & Fields<?, ?, ?>> Position saveData(
-			Context ctx, Location data) throws IOException {
+	public static Position saveData(Context ctx, Location data)
+			throws IOException {
 		final Position out = new Position();
 		final List<byte[]> listByteArrays = createListOfByteArrays(data, out);
 		Persist.saveData(ctx, FILE_PREFIX, listByteArrays);

@@ -26,7 +26,9 @@ public final class Wifi extends Data {
 	final List<Network> networks = new ArrayList<Wifi.Network>();
 	private static final String FILE_PREFIX = "wifi";
 
-	public static enum WifiFields implements
+	private Wifi() {}
+
+	private enum WifiFields implements
 			Fields<List<ScanResult>, Wifi, List<List<Byte>>> {
 		/*
 		 * getData takes a List<ScanResult> and produces a List<byte[]>. For
@@ -250,13 +252,15 @@ public final class Wifi extends Data {
 		}
 	}
 
-	static class Network {
+	private static class Network {
 
 		String ssid;
 		String bssid;
 		int frequency;
 		int level;
 		private static final String SEP = ", ";
+
+		Network() {}
 
 		@Override
 		public String toString() {

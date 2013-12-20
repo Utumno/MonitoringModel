@@ -4,7 +4,8 @@ import android.content.Context;
 
 import gr.uoa.di.android.helpers.DeviceIdentifier;
 import gr.uoa.di.android.helpers.DeviceIdentifier.DeviceIDException;
-import gr.uoa.di.android.helpers.FileIO;
+import gr.uoa.di.android.helpers.files.FileUtils;
+import gr.uoa.di.android.helpers.files.Writer;
 import gr.uoa.di.java.helpers.Zip.CompressException;
 import gr.uoa.di.monitoring.model.Fields;
 
@@ -64,8 +65,8 @@ public final class Persist {
 	 *             if the internal directory can't be created
 	 */
 	public static boolean availableData(Context ctx) throws IOException {
-		return !FileIO.isEmptyOrAbsent(getRootFolder(ctx)); // won't be absent,
-		// getRootFolder() will create it
+		return !FileUtils.isEmptyOrAbsent(getRootFolder(ctx)); // won't be
+		// absent, getRootFolder() will create it
 	}
 
 	/**
@@ -80,8 +81,8 @@ public final class Persist {
 	public static boolean deleteInternalFiles(Context ctx) {
 		boolean deleted = true;
 		try {
-			for (File f : FileIO.listFiles(Persist.getRootFolder(ctx))) {
-				deleted &= FileIO.delete(f);
+			for (File f : FileUtils.listFiles(Persist.getRootFolder(ctx))) {
+				deleted &= f.delete();
 			}
 		} catch (IOException e) {
 			// the directory does not exist and getRootFolder() failed to create
@@ -108,7 +109,7 @@ public final class Persist {
 			return gr.uoa.di.java.helpers.Zip.zipFolder(rootPath, destination)
 				.getFile();
 			// final String backFilename = System.currentTimeMillis() + ".zip";
-			// FileIO.copyFileFromInternalToExternalStorage(destination,
+			// FileUtils.copyFileFromInternalToExternalStorage(destination,
 			// LOG_DIR, backFilename);
 		} catch (CompressException e) {
 			throw new IOException("Unable to create zip file :" + e);
@@ -136,7 +137,7 @@ public final class Persist {
 			new byte[0]);
 		result[result.length - 1] = NEWLINE;
 		synchronized (FILE_STORE_LOCK) {
-			FileIO.append(file, result);
+			Writer.append(file, result);
 		}
 	}
 
@@ -188,7 +189,7 @@ public final class Persist {
 		}
 		result[result.length - 1] = NEWLINE;
 		synchronized (FILE_STORE_LOCK) {
-			FileIO.append(file, result);
+			Writer.append(file, result);
 		}
 	}
 
@@ -222,7 +223,7 @@ public final class Persist {
 						// w("No imei today : " + e);
 						rootFoldername = NO_IMEI;
 					}
-					sRootFolder = result = FileIO.createDirInternal(ctx,
+					sRootFolder = result = FileUtils.createDirInternal(ctx,
 						rootFoldername);
 				}
 			}
@@ -254,7 +255,7 @@ public final class Persist {
 	 */
 	private static File dataFileInInternalStorage(File internalDir,
 			String filename) throws IOException {
-		// File internalDir = FileIO.createDirInternal(ctx, sRootFolder);
+		// File internalDir = FileUtils.createDirInternal(ctx, sRootFolder);
 		if (internalDir.isDirectory()) return new File(internalDir, filename);
 		throw new IOException(internalDir.getAbsolutePath()
 			+ ((internalDir.exists()) ? " is not a directory."

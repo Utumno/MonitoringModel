@@ -27,8 +27,9 @@ public final class Battery extends Data {
 	String status;
 	private static final String FILE_PREFIX = "batt";
 
-	public static enum BatteryFields implements
-			Fields<Intent, Battery, List<Byte>> {
+	private Battery() {}
+
+	private enum BatteryFields implements Fields<Intent, Battery, List<Byte>> {
 		TIME {
 
 			@Override
