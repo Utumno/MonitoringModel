@@ -150,7 +150,6 @@ public final class Persist {
 	 *            must be an enum that extends Fields
 	 * @param file
 	 * @param fields
-	 * @param listByteArrays
 	 * @param listsOfByteArrays
 	 * @throws FileNotFoundException
 	 *             if the {@code file} is not found

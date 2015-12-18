@@ -1,11 +1,11 @@
 package gr.uoa.di.java.helpers;
 
+import java.io.File;
+
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import net.lingala.zip4j.model.ZipParameters;
 import net.lingala.zip4j.util.Zip4jConstants;
-
-import java.io.File;
 
 public final class Zip {
 
@@ -50,10 +50,10 @@ public final class Zip {
 	 *            a zip file
 	 * @param destPath
 	 *            must be an absolute path to a directory
-	 * @return a file instance representing a directory where the files were
+	 * @return a File instance representing a directory where the files were
 	 *         unzipped
 	 * @throws CompressException
-	 *             if fileToUnzip or destPath are incalid
+	 *             if fileToUnzip or destPath are invalid
 	 */
 	public static File unZipFolder(final File fileToUnzip, final String destPath)
 			throws CompressException {

@@ -130,8 +130,8 @@ public final class Battery extends Data {
 		return b;
 	}
 
-	public static <T extends Enum<T> & Fields<?, ?, ?>> Battery saveData(
-			Context ctx, Intent data) throws IOException {
+	public static Battery saveData(Context ctx, Intent data)
+			throws IOException {
 		final Battery out = new Battery();
 		List<byte[]> listByteArrays = createListOfByteArrays(data, out);
 		Persist.saveData(ctx, FILE_PREFIX, listByteArrays);
